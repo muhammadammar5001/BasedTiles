@@ -173,19 +173,38 @@ function gameOverScreen(){
   bestScoreOverEl.innerText='Best Score: '+bestScore;
 }
 
+// ... (rest of your script.js code)
+
 // --- SHARE ON FARCASTER ---
 shareBtn.addEventListener('click', () => {
-    // ⚠️ IMPORTANT: Replace 'YOUR_GITHUB_PAGES_URL_HERE' with your actual live game URL
-    const gameLink = 'YOUR_GITHUB_PAGES_URL_HERE'; // e.g., 'https://yourusername.github.io/BasedTiles/'
+    const gameLink = 'YOUR_GITHUB_PAGES_URL_HERE'; // **REMEMBER TO UPDATE THIS WITH YOUR ACTUAL GAME LINK**
 
-    const text = `I just scored ${score} on BASED TILES! 🎵💣\n\nCan you beat my combo of ${combo}?`;
-    
-    // Now including the gameLink directly in the text
-    const farcasterText = `${text}\n\nPlay it here: ${gameLink}`; 
+    // Construct the prompt for the image generation based on user's specific requirements
+    const imagePrompt = `A sleek, minimalist "Game Over" score card for "BASED TILES".
+                         The background must be completely black.
+                         The game title "BASED TILES" should be displayed prominently in bright blue (#0000ff).
+                         Below the title, display the game stats:
+                         - Stat Names (like "Score", "Combo", "Best Score") in white color.
+                         - Stat Numbers (current score, combo, best score) in bright blue (#0000ff) color.
+                         Ensure the text is bold, clear, and easy to read.
+                         No other text or elements should be present on the image.
+                         Score: ${score}, Combo: ${combo}, Best Score: ${bestScore}.`;
 
-    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(farcasterText)}`;
-    window.open(url, '_blank');
+    console.log("Generating image for Farcaster share..."); // For debugging
+
+    // Generate the image
+    const farcasterImageUrl = `http://googleusercontent.com/image_generation_content/3
+
+.replace('$score', score).replace('$combo', combo).replace('$bestScore', bestScore);
+
+    const farcasterText = `I just scored ${score} on BASED TILES! 🎵💣\nCan you beat my combo of ${combo}?\n\nPlay it here: ${gameLink}`; 
+
+    // Open the Farcaster compose window with the text AND the generated image
+    const farcasterShareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(farcasterText)}&embeds[]=${encodeURIComponent(farcasterImageUrl)}`;
+    window.open(farcasterShareUrl, '_blank');
 });
+
+// ... (rest of your script.js code)
 
 // Game Loop
 function gameLoop(){
