@@ -1,8 +1,8 @@
 // Game constants
 const COLUMNS = 4;
-const TILE_HEIGHT = 120; // Thoda bada kiya better touch ke liye
+const TILE_HEIGHT = 120;
 const SPAWN_RATE = 400;
-const MAX_SPEED = 12; // Thoda speed limit badhaya
+const MAX_SPEED = 12;
 const SPEED_INCREMENT = 0.04;
 
 // Game variables
@@ -17,7 +17,7 @@ const menu = document.getElementById('menu');
 const gameOver = document.getElementById('game-over');
 const startBtn = document.getElementById('start-btn');
 const playAgain = document.getElementById('play-again');
-const shareBtn = document.getElementById('share-btn'); // New Share Button
+const shareBtn = document.getElementById('share-btn'); // Ye HTML mein hona chahiye!
 const scoreEl = document.getElementById('score');
 const comboEl = document.getElementById('combo');
 const livesEl = document.getElementById('lives');
@@ -28,18 +28,17 @@ const statsEl = document.getElementById('stats');
 
 let bestScore = 0;
 
-// --- 1. AUDIO SETUP (WITH URL FIX) ---
+// --- 1. AUDIO SETUP (Working Fix) ---
 const audioUrls = [];
 const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']; 
 
-// URL Generation Logic
 for (let octave = 2; octave <= 7; octave++) {
     for (let note of notes) {
         let noteName = note + octave;
         if (octave === 2 && notes.indexOf(note) < notes.indexOf('f')) continue; 
         if (octave === 7 && note !== 'c') break;
         
-        // ⚠️ IMPORTANT FIX: '#' -> '%23'
+        // URL FIX: # ko %23 banana zaroori hai
         let encodedName = noteName.replace('#', '%23');
 
         audioUrls.push({
@@ -49,10 +48,8 @@ for (let octave = 2; octave <= 7; octave++) {
     }
 }
 
-// Templates Load
 const pianoSoundTemplates = audioUrls.map(item => {
     const audio = new Audio(item.url);
-    audio.addEventListener('error', (e) => console.error(`❌ Fail: ${item.name}`));
     return audio;
 });
 
@@ -91,7 +88,7 @@ function handleTileTap(tile){
   speed = Math.min(MAX_SPEED, speed + SPEED_INCREMENT);
   updateStats();
 
-  // Play Sound (Overlapping)
+  // Play Sound
   if(pianoSoundTemplates.length > 0) {
       const randomIndex = Math.floor(Math.random() * pianoSoundTemplates.length);
       const baseSound = pianoSoundTemplates[randomIndex];
@@ -139,7 +136,7 @@ function startGame(){
       currentBlastSound = null; 
   }
 
-  container.innerHTML = ''; // Clear all visual tiles
+  container.innerHTML = ''; 
   tiles=[];
   
   gameState='playing';
@@ -149,7 +146,16 @@ function startGame(){
   menu.style.display='none';
   gameOver.style.display='none';
   
-  drawColumnLines();
+  // Column lines check
+  if(container.querySelectorAll('.column-line').length === 0){
+      for(let i=1;i<COLUMNS;i++){
+        const line = document.createElement('div');
+        line.classList.add('column-line');
+        line.style.left = (i*(container.clientWidth/COLUMNS))+'px';
+        container.appendChild(line);
+      }
+  }
+
   updateStats();
   requestAnimationFrame(gameLoop);
 }
@@ -163,7 +169,11 @@ function gameOverScreen(){
   blastInstance.play().catch(e => {});
 
   statsEl.style.display='none';
-  container.innerHTML = ''; 
+  
+  // Remove tiles visually
+  tiles.forEach(t => {
+      if(container.contains(t.div)) container.removeChild(t.div);
+  });
   tiles=[];
   
   gameOver.style.display='flex';
@@ -173,38 +183,29 @@ function gameOverScreen(){
   bestScoreOverEl.innerText='Best Score: '+bestScore;
 }
 
-// ... (rest of your script.js code)
+// --- SHARE ON FARCASTER (Visual Image Generation) ---
+if(shareBtn) {
+    shareBtn.addEventListener('click', () => {
+        // 1. APNA GITHUB LINK YAHAN DALO
+        const gameLink = 'https://github.com/muhammadammar5001/BasedTiles'; 
 
-// --- SHARE ON FARCASTER ---
-shareBtn.addEventListener('click', () => {
-    const gameLink = 'YOUR_GITHUB_PAGES_URL_HERE'; // **REMEMBER TO UPDATE THIS WITH YOUR ACTUAL GAME LINK**
+        // 2. Image Prompt (Black BG, Blue Text #0000ff)
+        // Pollinations AI API use kar rahe hain jo URL se image banata hai
+        const prompt = `Black background, text "BASED TILES" in neon blue hex color #0000ff at top, 
+        list stats below: "Score" in white color value ${score} in blue #0000ff, 
+        "Combo" in white color value ${combo} in blue #0000ff, 
+        "Best Score" in white color value ${bestScore} in blue #0000ff. 
+        Minimalist digital HUD style. No other text.`;
+        
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true`;
 
-    // Construct the prompt for the image generation based on user's specific requirements
-    const imagePrompt = `A sleek, minimalist "Game Over" score card for "BASED TILES".
-                         The background must be completely black.
-                         The game title "BASED TILES" should be displayed prominently in bright blue (#0000ff).
-                         Below the title, display the game stats:
-                         - Stat Names (like "Score", "Combo", "Best Score") in white color.
-                         - Stat Numbers (current score, combo, best score) in bright blue (#0000ff) color.
-                         Ensure the text is bold, clear, and easy to read.
-                         No other text or elements should be present on the image.
-                         Score: ${score}, Combo: ${combo}, Best Score: ${bestScore}.`;
-
-    console.log("Generating image for Farcaster share..."); // For debugging
-
-    // Generate the image
-    const farcasterImageUrl = `http://googleusercontent.com/image_generation_content/3
-
-.replace('$score', score).replace('$combo', combo).replace('$bestScore', bestScore);
-
-    const farcasterText = `I just scored ${score} on BASED TILES! 🎵💣\nCan you beat my combo of ${combo}?\n\nPlay it here: ${gameLink}`; 
-
-    // Open the Farcaster compose window with the text AND the generated image
-    const farcasterShareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(farcasterText)}&embeds[]=${encodeURIComponent(farcasterImageUrl)}`;
-    window.open(farcasterShareUrl, '_blank');
-});
-
-// ... (rest of your script.js code)
+        const text = `I just scored ${score} on BASED TILES! 🎵\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
+        
+        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(imageUrl)}`;
+        
+        window.open(warpcastUrl, '_blank');
+    });
+}
 
 // Game Loop
 function gameLoop(){
@@ -238,18 +239,6 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
-function drawColumnLines(){
-  // Only draw if empty
-  if(container.querySelectorAll('.column-line').length === 0){
-      for(let i=1;i<COLUMNS;i++){
-        const line = document.createElement('div');
-        line.classList.add('column-line');
-        line.style.left = (i*(container.clientWidth/COLUMNS))+'px';
-        container.appendChild(line);
-      }
-  }
-}
-
 // Initial Setup
 startBtn.addEventListener('click', startGame);
 playAgain.addEventListener('click', startGame);
@@ -264,7 +253,7 @@ window.addEventListener('keydown', e=>{
   }
 });
 
-// Audio Unlock for Mobile
+// Audio Unlock
 window.addEventListener('touchstart', () => {
     if(pianoSoundTemplates.length > 0) {
         const dummy = pianoSoundTemplates[0].cloneNode();
