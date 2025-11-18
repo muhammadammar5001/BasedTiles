@@ -28,11 +28,11 @@ let bestScore = 0;
 
 // Audio
 const tileSounds = [
-  new Audio('sounds/kick.wav'),
-  new Audio('sounds/snare.wav'),
-  new Audio('sounds/hihat.wav')
+  new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/refs/heads/main/sounds/kick.wav'),
+  new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/refs/heads/main/sounds/snare.wav'),
+  new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/refs/heads/main/sounds/hihat.wav')
 ];
-const bombSound = new Audio('sounds/blast.mp3');
+const bombSound = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/refs/heads/main/sounds/blast.mp3');
 
 // Update stats
 function updateStats() {
