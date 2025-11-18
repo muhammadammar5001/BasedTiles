@@ -28,11 +28,10 @@ let bestScore = 0;
 
 // --- AUDIO SETUP FOR 60 CHROMATIC NOTES (F2 to C7) ---
 
-// Sharps (#) ko JS mein '#' se denote karte hain
 const audioUrls = [];
 const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']; 
 
-// Loop to generate URLs (Same as before)
+// Loop to generate URLs (Same)
 for (let octave = 2; octave <= 7; octave++) {
     for (let note of notes) {
         let noteName = note + octave;
@@ -42,10 +41,9 @@ for (let octave = 2; octave <= 7; octave++) {
     }
 }
 
-// **BADLAV 1:** Pre-load all sound objects
-// Hum yeh object clone karke use karenge taaki interruption sahi ho.
-const basePianoSounds = audioUrls.map(url => new Audio(url));
-const baseBlastSound = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/blast.mp3');
+// **BADLAV 1:** Audio variables ko clear names se define kiya gaya hai
+const pianoSoundTemplates = audioUrls.map(url => new Audio(url));
+const blastSoundTemplate = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/blast.mp3');
 
 
 // Update stats (Same)
@@ -64,24 +62,23 @@ function removeTile(id){
   }
 }
 
-// **BADLAV 2:** Handle tile tap function for proper interruption
+// **BADLAV 2:** Handle tile tap function (Cloning fix)
 function handleTileTap(tile){
   if(gameState!=='playing') return;
 
   if(tile.type==='bomb'){
-    // Blast sound yahan se remove kar diya gaya hai, yeh ab sirf gameOverScreen mein bajega
     gameOverScreen();
     return;
   }
 
   // Random sound select
-  const randomIndex = Math.floor(Math.random() * basePianoSounds.length);
-  const baseSound = basePianoSounds[randomIndex];
+  const randomIndex = Math.floor(Math.random() * pianoSoundTemplates.length);
+  const baseSound = pianoSoundTemplates[randomIndex];
   
   // **CLONING LOGIC:** Har tap ke liye naya audio object banayega
   const soundToPlay = baseSound.cloneNode(); 
   
-  // Sound interruption: currentTime = 0 (zaroori, kyunki cloneNode() current time ko bhi copy karta hai)
+  // Sound interruption: Play sound from the start
   soundToPlay.currentTime = 0; 
   soundToPlay.play();
   
@@ -95,12 +92,23 @@ function handleTileTap(tile){
 // Create a tile (Same)
 function createTile(col,type){
   const id = tileId++;
-// ... (rest of the createTile function remains the same)
+  const div = document.createElement('div');
+  div.classList.add('tile');
+  div.style.width = container.clientWidth / COLUMNS + 'px';
+  div.style.height = TILE_HEIGHT + 'px';
+  div.style.left = col * (container.clientWidth / COLUMNS) + 'px';
+  div.style.top = -TILE_HEIGHT + 'px';
+  div.style.background = `linear-gradient(to bottom, ${randomColor()}, ${randomColor()})`;
+  div.innerText = type==='bomb'?'💣':'♪';
+  div.addEventListener('click',()=>handleTileTap({id,type,div}));
+  container.appendChild(div);
+  tiles.push({id,col,y:-TILE_HEIGHT,type,div});
 }
 
 // Random gradient color (Same)
 function randomColor(){
-// ... (rest of the randomColor function remains the same)
+  const colors = ['#06b6d4','#3b82f6','#8b5cf6','#ec4899','#f97316','#ef4444'];
+  return colors[Math.floor(Math.random()*colors.length)];
 }
 
 // Start game (Same)
@@ -119,15 +127,12 @@ function startGame(){
 
 // **BADLAV 3:** Game over sound ko start hone se rokna
 function gameOverScreen(){
-    // **Fix:** Blast sound ko har naye game mein bajne se rokne ke liye
-    // Hum use play karne se pehle reset karenge.
-    baseBlastSound.currentTime = 0;
-    baseBlastSound.play(); 
-    // Sound ko thoda bajne ka time dete hain (e.g., 1 second)
+    // Blast sound ko play karne se pehle reset
+    const blastSoundInstance = blastSoundTemplate.cloneNode();
+    blastSoundInstance.currentTime = 0;
+    blastSoundInstance.play(); 
     
     gameState='gameOver';
-// ... (rest of the gameOverScreen function remains the same)
-
     statsEl.style.display='none';
     tiles.forEach(t=>container.removeChild(t.div));
     tiles=[];
@@ -137,21 +142,55 @@ function gameOverScreen(){
     if(score>bestScore) bestScore=score;
     bestScoreOverEl.innerText='Best Score: '+bestScore;
 
-    // **IMPORTANT FIX:** Agar sound लंबा है, तो उसे 1 सेकंड बाद pause कर दो
+    // **FIX:** Sound ko thoda bajne ka time dete hain aur phir pause karte hain
     setTimeout(() => {
-        baseBlastSound.pause();
-        baseBlastSound.currentTime = 0;
+        blastSoundInstance.pause();
+        blastSoundInstance.currentTime = 0;
     }, 1000); 
 }
 
 // Game loop (Same)
 function gameLoop(){
-// ... (rest of the gameLoop function remains the same)
+  if(gameState!=='playing') return;
+  const now = Date.now();
+  const dt = (now-lastTime)/1000;
+  lastTime=now;
+
+  spawnTimer += dt*1000;
+  while(spawnTimer>=SPAWN_RATE){
+    spawnTimer-=SPAWN_RATE;
+    const col = Math.floor(Math.random()*COLUMNS);
+    const type = Math.random()>0.8?'bomb':'normal';
+    createTile(col,type);
+  }
+
+  // Move tiles
+  tiles.forEach(t=>{
+    t.y += speed*100*dt;
+    t.div.style.top = t.y+'px';
+  });
+
+  // Check missed normal tiles
+  const missed = tiles.filter(t=>t.y>container.clientHeight+20 && t.type==='normal');
+  missed.forEach(t=>{
+    lives--;
+    combo=0;
+    removeTile(t.id);
+    if(lives<=0) gameOverScreen(); 
+  });
+
+  updateStats();
+  requestAnimationFrame(gameLoop);
 }
 
 // Column lines overlay (Same)
 function drawColumnLines(){
-// ... (rest of the drawColumnLines function remains the same)
+  for(let i=1;i<COLUMNS;i++){
+    const line = document.createElement('div');
+    line.classList.add('column-line');
+    line.style.left = (i*(container.clientWidth/COLUMNS))+'px';
+    container.appendChild(line);
+  }
 }
 drawColumnLines();
 
@@ -160,7 +199,12 @@ startBtn.addEventListener('click', startGame);
 playAgain.addEventListener('click', startGame);
 
 window.addEventListener('keydown', e=>{
-// ... (rest of the keydown function remains the same)
+  if(gameState!=='playing') return;
+  const map={'1':0,'2':1,'3':2,'4':3,'q':0,'w':1,'e':2,'r':3};
+  const col = map[e.key.toLowerCase()];
+  if(col===undefined) return;
+  const tile = tiles.find(t=>t.col===col);
+  if(tile) handleTileTap(tile);
 });
 
 // Unlock audio for mobile (Same)
