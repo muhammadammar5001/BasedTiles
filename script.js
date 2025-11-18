@@ -26,13 +26,9 @@ const statsEl = document.getElementById('stats');
 
 let bestScore = 0;
 
-// Audio
-const tileSounds = [
-  new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/refs/heads/main/sounds/kick.wav'),
-  new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/refs/heads/main/sounds/snare.wav'),
-  new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/refs/heads/main/sounds/hihat.wav')
-];
-const bombSound = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/refs/heads/main/sounds/blast.mp3');
+// Audio (use raw GitHub URLs or host locally in Farcaster public folder)
+const bassSound = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/kick.wav');
+const blastSound = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/blast.mp3');
 
 // Update stats
 function updateStats() {
@@ -55,12 +51,13 @@ function handleTileTap(tile){
   if(gameState!=='playing') return;
 
   if(tile.type==='bomb'){
-    bombSound.play();
+    blastSound.play();
     gameOverScreen();
     return;
   }
 
-  tileSounds[Math.floor(Math.random()*tileSounds.length)].play();
+  bassSound.currentTime = 0;
+  bassSound.play();
   removeTile(tile.id);
   score += 10 + Math.floor(combo/3)*5;
   combo++;
@@ -77,25 +74,20 @@ function createTile(col,type){
   div.style.height = TILE_HEIGHT + 'px';
   div.style.left = col * (container.clientWidth / COLUMNS) + 'px';
   div.style.top = -TILE_HEIGHT + 'px';
-  div.style.background = ['cyan','blue','purple','pink','red','orange'][Math.floor(Math.random()*6)];
+  div.style.background = `linear-gradient(to bottom, ${randomColor()}, ${randomColor()})`;
   div.innerText = type==='bomb'?'💣':'♪';
   div.addEventListener('click',()=>handleTileTap({id,type,div}));
   container.appendChild(div);
   tiles.push({id,col,y:-TILE_HEIGHT,type,div});
 }
 
-// Start game
-
-function unlockAudio() {
-  tileSounds.forEach(sound => sound.play().then(()=>sound.pause()));
-  bombSound.play().then(()=>bombSound.pause());
+// Random gradient color
+function randomColor(){
+  const colors = ['#06b6d4','#3b82f6','#8b5cf6','#ec4899','#f97316','#ef4444'];
+  return colors[Math.floor(Math.random()*colors.length)];
 }
 
-startBtn.addEventListener('click', () => {
-  unlockAudio();  // unlock audio on first interaction
-  startGame();
-});
-
+// Start game
 function startGame(){
   // Remove leftover tiles
   tiles.forEach(t=>container.removeChild(t.div));
@@ -137,11 +129,13 @@ function gameLoop(){
     createTile(col,type);
   }
 
+  // Move tiles
   tiles.forEach(t=>{
     t.y += speed*100*dt;
     t.div.style.top = t.y+'px';
   });
 
+  // Check missed normal tiles
   const missed = tiles.filter(t=>t.y>container.clientHeight+20 && t.type==='normal');
   missed.forEach(t=>{
     lives--;
@@ -153,6 +147,17 @@ function gameLoop(){
   updateStats();
   requestAnimationFrame(gameLoop);
 }
+
+// Column lines overlay
+function drawColumnLines(){
+  for(let i=1;i<COLUMNS;i++){
+    const line = document.createElement('div');
+    line.classList.add('column-line');
+    line.style.left = (i*(container.clientWidth/COLUMNS))+'px';
+    container.appendChild(line);
+  }
+}
+drawColumnLines();
 
 // Event listeners
 startBtn.addEventListener('click', startGame);
@@ -167,5 +172,5 @@ window.addEventListener('keydown', e=>{
   if(tile) handleTileTap(tile);
 });
 
-// Optional: touchstart to unlock mobile audio
+// Unlock audio for mobile
 window.addEventListener('touchstart', ()=>{}, { once:true });
