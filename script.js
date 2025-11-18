@@ -26,21 +26,40 @@ const statsEl = document.getElementById('stats');
 
 let bestScore = 0;
 
-// Audio (Using 8 different piano notes for variety)
-// *ZAROORI*: Yeh 8 files aapke GitHub repo ke /sounds/ folder mein honi chahiye.
-const audioUrls = [
-    'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/c4.mp3',
-    'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/d4.mp3',
-    'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/e4.mp3',
-    'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/f4.mp3',
-    'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/g4.mp3',
-    'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/a4.mp3',
-    'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/b4.mp3',
-    'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/c5.mp3' // High C
-];
+// --- AUDIO SETUP FOR 60 CHROMATIC NOTES (F2 to C7) ---
 
-// Saare notes ko Audio objects mein load karna
+// Sharps (#) ko JS mein '#' se denote karte hain, jisko URL mein '%23' banana padta hai.
+// Lekin GitHub Raw URLs automatically '#' ko handle kar lete hain, isliye hum seedha '#' use karenge.
+
+const audioUrls = [];
+// Saare notes (including sharps)
+const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']; 
+
+// Loop to generate URLs from Octave 2 to Octave 7
+for (let octave = 2; octave <= 7; octave++) {
+    for (let note of notes) {
+        
+        let noteName = note + octave;
+
+        // Octave 2 mein sirf F2 se B2 tak ke notes chahiye
+        if (octave === 2) {
+            if (notes.indexOf(note) < notes.indexOf('f')) continue; 
+        }
+
+        // Octave 7 mein sirf C7 tak chahiye
+        if (octave === 7) {
+            if (note !== 'c') break;
+        }
+        
+        // Final URL ko array mein add karein
+        // Hum maan rahe hain ki file ka naam 'c#3.mp3' format mein hai.
+        audioUrls.push(`https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/${noteName}.mp3`);
+    }
+}
+
+// Saare 60 notes ko Audio objects mein load karna
 const pianoSounds = audioUrls.map(url => new Audio(url));
+// Blast sound load karna
 const blastSound = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/blast.mp3');
 
 
@@ -65,17 +84,16 @@ function handleTileTap(tile){
   if(gameState!=='playing') return;
 
   if(tile.type==='bomb'){
-    blastSound.play();
+    blastSound.play(); 
     gameOverScreen();
     return;
   }
 
-  // Random sound select
+  // Random sound select (ab yeh 60 files mein se chunege)
   const randomIndex = Math.floor(Math.random() * pianoSounds.length);
   const soundToPlay = pianoSounds[randomIndex];
   
-  // **SOUND INTERRUPTION LOGIC**
-  // Agar sound pehle se baj raha hai, toh use kaat kar shuru se chalao.
+  // Sound interruption: Play sound from the start
   soundToPlay.currentTime = 0; 
   soundToPlay.play();
   
@@ -124,15 +142,18 @@ function startGame(){
 
 // Game over
 function gameOverScreen(){
-  gameState='gameOver';
-  statsEl.style.display='none';
-  tiles.forEach(t=>container.removeChild(t.div));
-  tiles=[];
-  gameOver.style.display='flex';
-  finalScoreEl.innerText=score;
-  finalComboEl.innerText=combo;
-  if(score>bestScore) bestScore=score;
-  bestScoreOverEl.innerText='Best Score: '+bestScore;
+    // Blast sound plays when game ends (lives = 0 or bomb tapped)
+    blastSound.play(); 
+    
+    gameState='gameOver';
+    statsEl.style.display='none';
+    tiles.forEach(t=>container.removeChild(t.div));
+    tiles=[];
+    gameOver.style.display='flex';
+    finalScoreEl.innerText=score;
+    finalComboEl.innerText=combo;
+    if(score>bestScore) bestScore=score;
+    bestScoreOverEl.innerText='Best Score: '+bestScore;
 }
 
 // Game loop
@@ -162,7 +183,7 @@ function gameLoop(){
     lives--;
     combo=0;
     removeTile(t.id);
-    if(lives<=0) gameOverScreen();
+    if(lives<=0) gameOverScreen(); 
   });
 
   updateStats();
