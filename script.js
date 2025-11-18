@@ -29,7 +29,7 @@ const statsEl = document.getElementById('stats');
 
 let bestScore = 0;
 
-// --- 1. AUDIO LOAD SYSTEM (ERROR DETECTOR K SATH) ---
+// --- 1. AUDIO LOAD SYSTEM (FIXED URL ENCODING) ---
 const audioUrls = [];
 const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']; 
 
@@ -40,9 +40,13 @@ for (let octave = 2; octave <= 7; octave++) {
         if (octave === 2 && notes.indexOf(note) < notes.indexOf('f')) continue; 
         if (octave === 7 && note !== 'c') break;
         
+        // ⚠️ YAHAN FIX KIYA HAI: '#' ko '%23' se badal diya
+        // Isse browser ko pata chalega ki ye file ka naam hai, anchor nahi.
+        let encodedName = noteName.replace('#', '%23');
+
         audioUrls.push({
-            name: noteName,
-            url: `https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/${noteName}.mp3`
+            name: noteName, // Ye display/debug ke liye normal rahega
+            url: `https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/${encodedName}.mp3`
         });
     }
 }
