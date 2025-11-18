@@ -215,7 +215,7 @@ function gameLoop(){
 }
 
 
-// --- SHARE ON FARCASTER (SVG Debugging & Reliable Fallback) ---
+// --- SHARE ON FARCASTER (FINAL ATTEMPT WITH CORRECT RAW URL) ---
 if (shareBtn) {
     shareBtn.addEventListener('click', async () => { 
         if (gameState !== 'gameOver') {
@@ -224,7 +224,8 @@ if (shareBtn) {
         }
 
         const gameLink = 'https://yourusername.github.io/BasedTiles/'; 
-        const svgImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/share_scorecard.svg'; 
+        // 🎯 FIX: CORRECT RAW URL
+        const svgImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/share_scorecard.svg'; 
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -239,7 +240,6 @@ if (shareBtn) {
 
         let imageLoaded = false;
         
-        // Image Load Promise with Timeout
         const imageLoadPromise = new Promise(resolve => {
             const timeoutId = setTimeout(() => resolve(false), 5000); 
 
@@ -248,7 +248,6 @@ if (shareBtn) {
                 imageLoaded = true;
                 resolve(true); 
             };
-            // 🎯 CRITICAL DEBUGGING: Log image loading error
             img.onerror = () => {
                 clearTimeout(timeoutId);
                 console.error("SVG Image Load FAILED. Using fallback canvas.");
@@ -262,21 +261,15 @@ if (shareBtn) {
         if (success && imageLoaded) {
             // Success: Draw SVG
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            console.log("SVG loaded successfully and drawn.");
         } else {
-            // Failure: Draw reliable fallback background
-            ctx.fillStyle = '#1e3a8a'; // Dark Blue background
+            // Failure: Draw simple solid background
+            ctx.fillStyle = '#1e3a8a'; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw Fallback Title/Heading
             ctx.font = '24px "Press Start 2P", monospace';
             ctx.textAlign = 'center';
             ctx.fillStyle = '#FFFFFF';
             ctx.fillText('BASED TILES', canvas.width / 2, 40);
-            
-            // Draw a red line as a visual cue that fallback was used
-            ctx.fillStyle = '#dc2626';
-            ctx.fillRect(0, 50, canvas.width, 5);
         }
 
         // --- Load Press Start 2P Font for Canvas ---
@@ -291,10 +284,9 @@ if (shareBtn) {
 
         ctx.fillStyle = '#FFFFFF'; 
         
-        // --- Dynamic Stats Drawing ---
-        // Coordinates for 600x338 canvas
-        const X_HEAD_POS = 150; 
-        const X_VALUE_POS = 450; 
+        // --- DRAW HEADINGS & DYNAMIC STATS ---
+        const X_HEAD_POS = 100; 
+        const X_VALUE_POS = 500; 
         const Y_START = 160; 
         const Y_STEP = 50;
         
@@ -302,28 +294,26 @@ if (shareBtn) {
 
         // SCORE
         ctx.textAlign = 'left';
-        ctx.fillText('SCORE', X_HEAD_POS, Y_START);
+        ctx.fillText('SCORE:', X_HEAD_POS, Y_START);
         ctx.textAlign = 'right';
         ctx.fillText(score, X_VALUE_POS, Y_START);
 
         // COMBO
         ctx.textAlign = 'left';
-        ctx.fillText('COMBO', X_HEAD_POS, Y_START + Y_STEP);
+        ctx.fillText('COMBO:', X_HEAD_POS, Y_START + Y_STEP);
         ctx.textAlign = 'right';
         ctx.fillText(combo, X_VALUE_POS, Y_START + Y_STEP);
         
         // BEST SCORE
         ctx.textAlign = 'left';
-        ctx.fillText('BEST SCORE', X_HEAD_POS, Y_START + 2 * Y_STEP);
+        ctx.fillText('BEST SCORE:', X_HEAD_POS, Y_START + 2 * Y_STEP);
         ctx.textAlign = 'right';
         ctx.fillText(bestScore, X_VALUE_POS, Y_START + 2 * Y_STEP);
         
-        
-                // --- 4. SHARE ---
-        // Final Base64 Image URL (Smallest possible size)
+        // --- SHARE ---
         const farcasterImageUrl = canvas.toDataURL('image/png'); 
         
-        // 🎯 FIX: Best Score added to the plain text post
+        // 🎯 FIX 2: Best Score added to the plain text post
         const text = `I just scored ${score} on BASED TILES! 🎵\nMy Best Score is ${bestScore}.\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
         
         const encodedEmbedUrl = encodeURIComponent(farcasterImageUrl);
@@ -332,7 +322,6 @@ if (shareBtn) {
         window.open(warpcastUrl, '_blank');
     });
 }
-
 
 
 // --- Initial Setup and Event Listeners (UNCHANGED) ---
