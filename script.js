@@ -1,309 +1,186 @@
-// Game constants
-const COLUMNS = 4;
-const TILE_HEIGHT = 120;
-const SPAWN_RATE = 400;
-const MAX_SPEED = 12;
-const SPEED_INCREMENT = 0.04;
-
-// Game variables
-let gameState = 'menu';
-let score = 0, combo = 0, lives = 3, tileId = 0, speed = 3, spawnTimer = 0, lastTime = Date.now();
-let tiles = [];
-let currentBlastSound = null; 
-
-// DOM elements
-const container = document.getElementById('game-container');
-const menu = document.getElementById('menu');
-const gameOver = document.getElementById('game-over');
-const startBtn = document.getElementById('start-btn');
-const playAgain = document.getElementById('play-again');
-const shareBtn = document.getElementById('share-btn'); // Ye HTML mein hona chahiye!
-const scoreEl = document.getElementById('score');
-const comboEl = document.getElementById('combo');
-const livesEl = document.getElementById('lives');
-const finalScoreEl = document.getElementById('final-score');
-const finalComboEl = document.getElementById('final-combo');
-const bestScoreOverEl = document.getElementById('best-score-over');
-const statsEl = document.getElementById('stats');
-
-let bestScore = 0;
-
-// --- 1. AUDIO SETUP (Working Fix) ---
-const audioUrls = [];
-const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']; 
-
-for (let octave = 2; octave <= 7; octave++) {
-    for (let note of notes) {
-        let noteName = note + octave;
-        if (octave === 2 && notes.indexOf(note) < notes.indexOf('f')) continue; 
-        if (octave === 7 && note !== 'c') break;
-        
-        // URL FIX: # ko %23 banana zaroori hai
-        let encodedName = noteName.replace('#', '%23');
-
-        audioUrls.push({
-            name: noteName,
-            url: `https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/${encodedName}.mp3`
-        });
-    }
-}
-
-const pianoSoundTemplates = audioUrls.map(item => {
-    const audio = new Audio(item.url);
-    return audio;
-});
-
-const blastSoundTemplate = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/blast.mp3');
-
-// Update stats
-function updateStats() {
-  scoreEl.innerText = score;
-  comboEl.innerText = combo;
-  livesEl.innerText = '❤️'.repeat(lives);
-}
-
-// Remove tile
-function removeTile(id){
-  const index = tiles.findIndex(t=>t.id===id);
-  if(index>-1){
-    if(container.contains(tiles[index].div)){
-        container.removeChild(tiles[index].div);
-    }
-    tiles.splice(index,1);
-  }
-}
-
-// --- HANDLE TAP ---
-function handleTileTap(tile){
-  if(gameState !== 'playing') return;
-
-  if(tile.type === 'bomb'){
-    gameOverScreen();
-    return;
-  }
-
-  removeTile(tile.id);
-  score += 10 + Math.floor(combo/3)*5;
-  combo++;
-  speed = Math.min(MAX_SPEED, speed + SPEED_INCREMENT);
-  updateStats();
-
-  // Play Sound
-  if(pianoSoundTemplates.length > 0) {
-      const randomIndex = Math.floor(Math.random() * pianoSoundTemplates.length);
-      const baseSound = pianoSoundTemplates[randomIndex];
-      const soundToPlay = baseSound.cloneNode(); 
-      soundToPlay.volume = 1.0;
-      soundToPlay.play().catch(e => {});
-  }
-}
-
-// Create Tile
-function createTile(col,type){
-  const id = tileId++;
-  const div = document.createElement('div');
-  div.classList.add('tile');
-  div.style.width = container.clientWidth / COLUMNS + 'px';
-  div.style.height = TILE_HEIGHT + 'px';
-  div.style.left = col * (container.clientWidth / COLUMNS) + 'px';
-  div.style.top = -TILE_HEIGHT + 'px';
-  div.style.background = `linear-gradient(to bottom, ${randomColor()}, ${randomColor()})`;
-  div.innerText = type==='bomb'?'💣':'♪';
+/* --- Base Styles: Apply Press Start 2P everywhere --- */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
   
-  const triggerTap = (e) => {
-      e.preventDefault(); 
-      e.stopPropagation();
-      handleTileTap({id,type,div});
-  };
-
-  div.addEventListener('mousedown', triggerTap);
-  div.addEventListener('touchstart', triggerTap);
-
-  container.appendChild(div);
-  tiles.push({id,col,y:-TILE_HEIGHT,type,div});
+  /* Har jagah Press Start 2P font apply kiya */
+  font-family: 'Press Start 2P', cursive; 
+  font-size: 12px; /* Base size bahut chota rakha */
+  line-height: 1.5; /* Line-height set kiya taaki words chipke nahi */
+  
+  background: linear-gradient(to bottom, #0f172a, #000);
+  color: white;
+  overflow: hidden; 
+  touch-action: none; 
 }
 
-function randomColor(){
-  const colors = ['#06b6d4','#3b82f6','#8b5cf6','#ec4899','#f97316','#ef4444'];
-  return colors[Math.floor(Math.random()*colors.length)];
+#game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-// --- START GAME ---
-function startGame(){
-  if (currentBlastSound) {
-      currentBlastSound.pause();
-      currentBlastSound.currentTime = 0;
-      currentBlastSound = null; 
-  }
-
-  container.innerHTML = ''; 
-  tiles=[];
-  
-  gameState='playing';
-  score=0; combo=0; lives=3; tileId=0; speed=3; spawnTimer=0; lastTime=Date.now();
-  
-  statsEl.style.display='flex';
-  menu.style.display='none';
-  gameOver.style.display='none';
-  
-  // Column lines check
-  if(container.querySelectorAll('.column-line').length === 0){
-      for(let i=1;i<COLUMNS;i++){
-        const line = document.createElement('div');
-        line.classList.add('column-line');
-        line.style.left = (i*(container.clientWidth/COLUMNS))+'px';
-        container.appendChild(line);
-      }
-  }
-
-  updateStats();
-  requestAnimationFrame(gameLoop);
+/* --- Game Title (Top) --- */
+#game-title {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 5px;
 }
 
-// --- GAME OVER ---
-function gameOverScreen(){
-  gameState='gameOver';
-  
-  const blastInstance = blastSoundTemplate.cloneNode();
-  currentBlastSound = blastInstance; 
-  blastInstance.play().catch(e => {});
-
-  statsEl.style.display='none';
-  
-  // Remove tiles visually
-  tiles.forEach(t => {
-      if(container.contains(t.div)) container.removeChild(t.div);
-  });
-  tiles=[];
-  
-  gameOver.style.display='flex';
-  finalScoreEl.innerText=score;
-  finalComboEl.innerText=combo;
-  if(score>bestScore) bestScore=score;
-  bestScoreOverEl.innerText='Best Score: '+bestScore;
+#game-title h1 {
+  margin: 0;
+  font-size: 24px; /* Title size */
+  font-weight: normal; 
+  letter-spacing: 2px;
+  /* Retro Neon Blue effect */
+  background: linear-gradient(to right, #06b6d4, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
 }
 
-// ... (rest of your script.js code)
-
-// --- SHARE ON FARCASTER (Canvas Image Generation) ---
-if(shareBtn) {
-    shareBtn.addEventListener('click', async () => {
-        const gameLink = 'https://yourusername.github.io/BasedTiles/'; // Replace with your actual game URL
-
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-
-        canvas.width = 800; // Farcaster embeds ke liye suitable size
-        canvas.height = 450;
-
-        // Background Draw karo - Solid Blue
-        ctx.fillStyle = '#0000ff'; // Blue background
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Title "Based Tiles"
-        ctx.font = 'bold 50px "Press Start 2P"'; // Retro font
-        ctx.fillStyle = '#FFFFFF'; // White color
-        ctx.textAlign = 'center';
-        ctx.fillText('Based Tiles', canvas.width / 2, 80); // Y position adjust kiya
-
-        // "Game Over"
-        ctx.font = '28px "Press Start 2P"';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('Game Over', canvas.width / 2, 150);
-
-
-        // Stats (Score, Combo, Best Score)
-        ctx.textAlign = 'left';
-        const startX = canvas.width / 2 - 180; // Left align ke liye adjust kiya
-        let startY = 220;
-        const lineHeight = 70; // Lines ke beech zyada space
-
-        // SCORE
-        ctx.font = '22px "Press Start 2P"';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('SCORE', startX, startY);
-        ctx.fillText(score, startX + 250, startY); // Value ko right align kiya
-        ctx.fillRect(startX, startY + 5, 400, 2); // Line draw ki
-        startY += lineHeight;
-
-        // COMBO
-        ctx.font = '22px "Press Start 2P"';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('COMBO', startX, startY);
-        ctx.fillText(combo, startX + 250, startY);
-        ctx.fillRect(startX, startY + 5, 400, 2); // Line draw ki
-        startY += lineHeight;
-
-        // BEST SCORE
-        ctx.font = '22px "Press Start 2P"';
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText('BEST SCORE', startX, startY);
-        ctx.fillText(bestScore, startX + 250, startY);
-        ctx.fillRect(startX, startY + 5, 400, 2); // Line draw ki
-        
-        // Canvas to Image URL
-        const farcasterImageUrl = canvas.toDataURL('image/png'); // PNG format
-
-        const text = `I just scored ${score} on BASED TILES! 🎵\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
-        
-        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(farcasterImageUrl)}`;
-        
-        window.open(warpcastUrl, '_blank');
-    });
+/* --- Stats Bar (SCORE, COMBO, LIVES) --- */
+#stats {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 5px; /* Thoda kam kiya */
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(5px);
+  padding: 8px 0;
 }
 
-// ... (rest of your script.js code)
-
-// Game Loop
-function gameLoop(){
-  if(gameState!=='playing') return;
-  const now = Date.now();
-  const dt = (now-lastTime)/1000;
-  lastTime=now;
-
-  spawnTimer += dt*1000;
-  while(spawnTimer>=SPAWN_RATE){
-    spawnTimer-=SPAWN_RATE;
-    const col = Math.floor(Math.random()*COLUMNS);
-    const type = Math.random()>0.8?'bomb':'normal';
-    createTile(col,type);
-  }
-
-  tiles.forEach(t=>{
-    t.y += speed*100*dt;
-    t.div.style.top = t.y+'px';
-  });
-
-  const missed = tiles.filter(t=>t.y > container.clientHeight && t.type==='normal');
-  missed.forEach(t=>{
-    lives--;
-    combo=0;
-    removeTile(t.id);
-    if(lives<=0) gameOverScreen();
-  });
-
-  updateStats();
-  requestAnimationFrame(gameLoop);
+.stat-box {
+  text-align: center;
+  min-width: 60px;
 }
 
-// Initial Setup
-startBtn.addEventListener('click', startGame);
-playAgain.addEventListener('click', startGame);
+.label {
+  font-size: 8px; /* Labels bahut chote rakhe taaki upar space ho */
+  color: #aaa;
+  letter-spacing: 1px;
+}
 
-window.addEventListener('keydown', e=>{
-  if(gameState!=='playing') return;
-  const map={'1':0,'2':1,'3':2,'4':3,'q':0,'w':1,'e':2,'r':3};
-  const col = map[e.key.toLowerCase()];
-  if(col!==undefined){
-      const colTiles = tiles.filter(t => t.col === col).sort((a,b) => b.y - a.y);
-      if(colTiles.length > 0) handleTileTap(colTiles[0]);
-  }
-});
+.stat-box div:nth-child(2){
+  font-size: 16px; /* Numbers size */
+  font-weight: normal;
+  color: #fff;
+  text-shadow: 0 0 5px cyan; 
+}
 
-// Audio Unlock
-window.addEventListener('touchstart', () => {
-    if(pianoSoundTemplates.length > 0) {
-        const dummy = pianoSoundTemplates[0].cloneNode();
-        dummy.play().then(() => dummy.pause()).catch(()=>{});
-    }
-}, { once:true });
+/* --- Game Container --- */
+#game-container {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  flex-grow: 1; 
+  background: linear-gradient(to bottom, #000000, #0f172a);
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.1);
+  box-shadow: 0 0 30px rgba(0,0,0,0.8);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.column-line {
+  position: absolute;
+  top:0;
+  bottom:0;
+  width: 1px;
+  background: rgba(255,255,255,0.1);
+}
+
+/* --- Tiles --- */
+.tile {
+  position: absolute;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 18px; /* Tiles par text/emoji size */
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: transform 0.05s;
+}
+
+.tile:active {
+    transform: scale(0.95);
+}
+
+/* --- Menu and Game Over Screens --- */
+#menu, #game-over {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.9); /* Thoda dark background */
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  z-index: 100;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#menu h1, #game-over h1 {
+  font-size: 20px; /* Titles size */
+  margin: 0;
+  text-align: center;
+  line-height: 1.5; /* Line-height adjust kiya */
+}
+
+#menu p, #game-over div {
+  font-size: 10px; /* General text size */
+  text-align: center;
+  line-height: 1.5;
+}
+
+#game-over #final-score, 
+#game-over #final-combo, 
+#game-over #best-score-over {
+    font-size: 14px; /* Game Over stats size */
+    margin-top: 5px;
+}
+
+
+/* --- Buttons --- */
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 80%;
+    max-width: 300px;
+}
+
+button {
+  padding: 12px 20px;
+  font-size: 10px; /* Button text size */
+  font-weight: normal;
+  border: none;
+  border-radius: 5px; 
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(to right, #06b6d4, #3b82f6);
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.4); 
+  transition: transform 0.1s ease;
+}
+
+button:active { 
+    background: linear-gradient(to right, #059cb8, #2e6bd6); 
+    transform: scale(0.98);
+}
+
+#share-btn {
+    background: linear-gradient(to right, #855DCD, #5a369c);
+    box-shadow: 0 0 10px rgba(133, 93, 205, 0.4);
+}
