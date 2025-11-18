@@ -219,80 +219,43 @@ function gameLoop(){
 }
 
 
-// --- SHARE ON FARCASTER (async/await Fix and Base64 Reliability) ---
+// --- SHARE ON FARCASTER (Custom SVG Background and async/await Fix) ---
 if (shareBtn) {
-    // FIX: Click handler is now async (required for await)
     shareBtn.addEventListener('click', async () => { 
-        if (gameState !== 'gameOver') {
-            alert("Please finish the game first to share your score!");
-            return;
-        }
+        // ... (existing code for gameState check) ...
 
         const gameLink = 'https://yourusername.github.io/BasedTiles/'; 
-        // ⚠️ Raw URL of your SVG file
         const svgImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/share_scorecard.svg'; 
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
-        canvas.width = 800; 
-        canvas.height = 450;
+        // 🎯 FIX: Reduced Canvas size to get a shorter Base64 URL
+        canvas.width = 600; 
+        canvas.height = 338; 
 
-        const img = new Image();
-        img.crossOrigin = 'Anonymous'; 
-        img.src = svgImageUrl; 
-
-        let imageLoaded = false;
+        // ... (existing code for img loading) ...
         
-        const imageLoadPromise = new Promise(resolve => {
-            const timeoutId = setTimeout(() => resolve(false), 5000); 
-
-            img.onload = () => {
-                clearTimeout(timeoutId);
-                imageLoaded = true;
-                resolve(true); 
-            };
-            img.onerror = () => {
-                clearTimeout(timeoutId);
-                resolve(false); 
-            };
-        });
-
-        const success = await imageLoadPromise;
-
-        // Draw background (SVG or Fallback)
-        if (success && imageLoaded) {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        } else {
-            ctx.fillStyle = '#0f172a'; // Fallback background
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.font = '28px "Press Start 2P", monospace';
-            ctx.textAlign = 'center';
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillText('BASED TILES - SCORE CARD (FALLBACK)', canvas.width / 2, 80);
-        }
-
-        // --- Load Press Start 2P Font for Canvas ---
-        const fontUrl = 'https://fonts.gstatic.com/s/pressstart2p/v15/PFDZzYBfbfayzGWSDIZog_e_kqchbkkx0Yd6.woff2';
-        const fontFace = new FontFace('Press Start 2P', `url(${fontUrl})`);
-        try {
-            await fontFace.load();
-            document.fonts.add(fontFace);
-        } catch (e) {
-            console.error('Failed to load Press Start 2P font for Canvas.');
-        }
+        // ... (existing code for font loading) ...
 
         ctx.fillStyle = '#FFFFFF'; 
         
-        // --- Dynamic Stats Drawing ---
-        const SCORE_X_POS = 600; 
-        
-        ctx.font = '28px "Press Start 2P", monospace'; 
+        // --- Dynamic Stats Drawing (Coordinates Adjusted for 600px width) ---
+        // 🎯 FIX: Adjusted coordinates
+        const SCORE_X_POS = 450; // X position: (600 * 0.75) approx
+
+        // Font size bhi chota karna padega agar screen choti ki hai
+        ctx.font = '20px "Press Start 2P", monospace'; 
         ctx.textAlign = 'right'; 
 
-        ctx.fillText(score, SCORE_X_POS, 220); 
-        ctx.fillText(combo, SCORE_X_POS, 290); 
-        ctx.fillText(bestScore, SCORE_X_POS, 360); 
+        // SCORE VALUE (Approximate Y-coordinates for the new height)
+        ctx.fillText(score, SCORE_X_POS, 160); 
+
+        // COMBO VALUE
+        ctx.fillText(combo, SCORE_X_POS, 210); 
+        
+        // BEST SCORE VALUE
+        ctx.fillText(bestScore, SCORE_X_POS, 260); 
         
         // --- SHARE ---
         // Final Canvas to Image URL (Base64)
@@ -300,18 +263,14 @@ if (shareBtn) {
         
         const text = `I just scored ${score} on BASED TILES! 🎵\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
         
-        // FIX: Ensuring the URL is correctly constructed and encoded
         const encodedEmbedUrl = encodeURIComponent(farcasterImageUrl);
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodedEmbedUrl}`;
         
-        // FIX 2: Open new window
         window.open(warpcastUrl, '_blank');
-        
-        // If the window doesn't open, it's usually blocked by the browser's pop-up blocker.
-        // Users might need to allow pop-ups for your site.
     });
 }
 
+    
 
 // --- Initial Setup and Event Listeners ---
 startBtn.addEventListener('click', startGame);
