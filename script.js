@@ -85,6 +85,17 @@ function createTile(col,type){
 }
 
 // Start game
+
+function unlockAudio() {
+  tileSounds.forEach(sound => sound.play().then(()=>sound.pause()));
+  bombSound.play().then(()=>bombSound.pause());
+}
+
+startBtn.addEventListener('click', () => {
+  unlockAudio();  // unlock audio on first interaction
+  startGame();
+});
+
 function startGame(){
   // Remove leftover tiles
   tiles.forEach(t=>container.removeChild(t.div));
