@@ -215,7 +215,7 @@ function gameLoop(){
 }
 
 
-// --- SHARE ON FARCASTER (FINAL ATTEMPT WITH CORRECT RAW URL) ---
+// --- SHARE ON FARCASTER (PNG + Press Start 2P + Working Embed) ---
 if (shareBtn) {
     shareBtn.addEventListener('click', async () => { 
         if (gameState !== 'gameOver') {
@@ -223,103 +223,71 @@ if (shareBtn) {
             return;
         }
 
-        const gameLink = 'https://yourusername.github.io/BasedTiles/'; 
-        // 🎯 FIX: CORRECT RAW URL
-        const svgImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/share_scorecard.svg'; 
+        const gameLink = 'https://yourusername.github.io/BasedTiles/';
+
+        // USE PNG (SVG breaks Warpcast)
+        const pngTemplateUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/share_scorecard.png';
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
-        // Canvas size: 600x338
-        canvas.width = 600; 
-        canvas.height = 338; 
+        canvas.width = 600;
+        canvas.height = 338;
 
         const img = new Image();
-        img.crossOrigin = 'Anonymous'; 
-        img.src = svgImageUrl; 
+        img.crossOrigin = "anonymous";
+        img.src = pngTemplateUrl;
 
-        let imageLoaded = false;
-        
-        const imageLoadPromise = new Promise(resolve => {
-            const timeoutId = setTimeout(() => resolve(false), 5000); 
-
-            img.onload = () => {
-                clearTimeout(timeoutId);
-                imageLoaded = true;
-                resolve(true); 
-            };
-            img.onerror = () => {
-                clearTimeout(timeoutId);
-                console.error("SVG Image Load FAILED. Using fallback canvas.");
-                resolve(false); 
-            };
+        await new Promise(resolve => {
+            img.onload = resolve;
+            img.onerror = resolve;
         });
 
-        const success = await imageLoadPromise;
+        // Draw template PNG
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        // --- BACKGROUND DRAWING ---
-        if (success && imageLoaded) {
-            // Success: Draw SVG
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        } else {
-            // Failure: Draw simple solid background
-            ctx.fillStyle = '#1e3a8a'; 
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.font = '24px "Press Start 2P", monospace';
-            ctx.textAlign = 'center';
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillText('BASED TILES', canvas.width / 2, 40);
-        }
-
-        // --- Load Press Start 2P Font for Canvas ---
+        // Load Press Start 2P font
         const fontUrl = 'https://fonts.gstatic.com/s/pressstart2p/v15/PFDZzYBfbfayzGWSDIZog_e_kqchbkkx0Yd6.woff2';
-        const fontFace = new FontFace('Press Start 2P', `url(${fontUrl})`);
-        try {
-            await fontFace.load();
-            document.fonts.add(fontFace);
-        } catch (e) {
-            console.error('Failed to load Press Start 2P font for Canvas.');
-        }
+        const pressFont = new FontFace('Press Start 2P', `url(${fontUrl})`);
+        await pressFont.load();
+        document.fonts.add(pressFont);
 
-        ctx.fillStyle = '#FFFFFF'; 
-        
-        // --- DRAW HEADINGS & DYNAMIC STATS ---
-        const X_HEAD_POS = 100; 
-        const X_VALUE_POS = 500; 
-        const Y_START = 160; 
-        const Y_STEP = 50;
-        
-        ctx.font = '16px "Press Start 2P", monospace'; 
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "left";
+        ctx.font = '16px "Press Start 2P"';
 
-        // SCORE
-        ctx.textAlign = 'left';
-        ctx.fillText('SCORE:', X_HEAD_POS, Y_START);
-        ctx.textAlign = 'right';
-        ctx.fillText(score, X_VALUE_POS, Y_START);
+        const X_HEAD = 100;
+        const X_VAL = 500;
+        const Y = 160, STEP = 50;
 
-        // COMBO
-        ctx.textAlign = 'left';
-        ctx.fillText('COMBO:', X_HEAD_POS, Y_START + Y_STEP);
-        ctx.textAlign = 'right';
-        ctx.fillText(combo, X_VALUE_POS, Y_START + Y_STEP);
-        
-        // BEST SCORE
-        ctx.textAlign = 'left';
-        ctx.fillText('BEST SCORE:', X_HEAD_POS, Y_START + 2 * Y_STEP);
-        ctx.textAlign = 'right';
-        ctx.fillText(bestScore, X_VALUE_POS, Y_START + 2 * Y_STEP);
-        
-        // --- SHARE ---
-        const farcasterImageUrl = canvas.toDataURL('image/png'); 
-        
-        // 🎯 FIX 2: Best Score added to the plain text post
+        ctx.fillText("SCORE:", X_HEAD, Y);
+        ctx.textAlign = "right";
+        ctx.fillText(score, X_VAL, Y);
+
+        ctx.textAlign = "left";
+        ctx.fillText("COMBO:", X_HEAD, Y + STEP);
+        ctx.textAlign = "right";
+        ctx.fillText(combo, X_VAL, Y + STEP);
+
+        ctx.textAlign = "left";
+        ctx.fillText("BEST SCORE:", X_HEAD, Y + STEP * 2);
+        ctx.textAlign = "right";
+        ctx.fillText(bestScore, X_VAL, Y + STEP * 2);
+
+        // Share Image URL (Base64 too huge → upload instead)
+        const pngBase64 = canvas.toDataURL("image/png");
+
+        // --- IMPORTANT ---
+        // Upload PNG to GitHub or server automatically? Not possible client-side.
+        // So we embed the TEMPLATE PNG (small file) instead.
+        const embedImageUrl = pngTemplateUrl; 
+
         const text = `I just scored ${score} on BASED TILES! 🎵\nMy Best Score is ${bestScore}.\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
-        
-        const encodedEmbedUrl = encodeURIComponent(farcasterImageUrl);
-        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodedEmbedUrl}`;
-        
-        window.open(warpcastUrl, '_blank');
+
+        const warpcastUrl =
+            `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds=${encodeURIComponent(embedImageUrl)}`;
+
+        window.open(warpcastUrl, "_blank");
     });
 }
 
