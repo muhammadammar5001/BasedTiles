@@ -3,20 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Magic Tiles Farcaster</title>
+<title>Magic Tiles</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="game">
-  <!-- Stats -->
+  <!-- Stats Bar -->
   <div id="stats">
-    <div>SCORE: <span id="score">0</span></div>
-    <div>COMBO: <span id="combo">0</span></div>
-    <div>LIVES: <span id="lives">❤️❤️❤️</span></div>
+    <div class="stat-box">
+      <div class="label">SCORE</div>
+      <div id="score">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="label">COMBO</div>
+      <div id="combo">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="label">LIVES</div>
+      <div id="lives">❤️❤️❤️</div>
+    </div>
   </div>
 
-  <!-- Game container -->
+  <!-- Game Container -->
   <div id="game-container"></div>
 
   <!-- Menu -->
