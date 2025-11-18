@@ -8,6 +8,7 @@ const SPEED_INCREMENT = 0.03;
 // Game variables (Same)
 let gameState = 'menu';
 let score = 0, combo = 0, lives = 3, tileId = 0, speed = 2.5, spawnTimer = 0, lastTime = Date.now();
+let currentBlastSound = null; // To store the currently playing blast sound
 let tiles = [];
 
 // DOM elements (Same)
@@ -25,6 +26,8 @@ const bestScoreOverEl = document.getElementById('best-score-over');
 const statsEl = document.getElementById('stats');
 
 let bestScore = 0;
+// **NEW GLOBAL VARIABLE**
+let currentBlastSound = null; // To store the currently playing blast sound for stopping it later
 
 // --- AUDIO SETUP FOR 60 CHROMATIC NOTES (F2 to C7) ---
 
@@ -41,7 +44,7 @@ for (let octave = 2; octave <= 7; octave++) {
     }
 }
 
-// **BADLAV 1:** Audio variables ko clear names se define kiya gaya hai
+// **BADLAV 1:** Templates use kar rahe hain
 const pianoSoundTemplates = audioUrls.map(url => new Audio(url));
 const blastSoundTemplate = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/blast.mp3');
 
@@ -62,7 +65,7 @@ function removeTile(id){
   }
 }
 
-// **BADLAV 2:** Handle tile tap function (Cloning fix)
+// **BADLAV 2:** Handle tile tap function (Cloning logic for sound fix)
 function handleTileTap(tile){
   if(gameState!=='playing') return;
 
@@ -91,28 +94,23 @@ function handleTileTap(tile){
 
 // Create a tile (Same)
 function createTile(col,type){
-  const id = tileId++;
-  const div = document.createElement('div');
-  div.classList.add('tile');
-  div.style.width = container.clientWidth / COLUMNS + 'px';
-  div.style.height = TILE_HEIGHT + 'px';
-  div.style.left = col * (container.clientWidth / COLUMNS) + 'px';
-  div.style.top = -TILE_HEIGHT + 'px';
-  div.style.background = `linear-gradient(to bottom, ${randomColor()}, ${randomColor()})`;
-  div.innerText = type==='bomb'?'💣':'♪';
-  div.addEventListener('click',()=>handleTileTap({id,type,div}));
-  container.appendChild(div);
-  tiles.push({id,col,y:-TILE_HEIGHT,type,div});
+// ... (Same)
 }
 
 // Random gradient color (Same)
 function randomColor(){
-  const colors = ['#06b6d4','#3b82f6','#8b5cf6','#ec4899','#f97316','#ef4444'];
-  return colors[Math.floor(Math.random()*colors.length)];
+// ... (Same)
 }
 
-// Start game (Same)
+// **BADLAV 3:** Start game (Blast sound ko rokna)
 function startGame(){
+    // **FIX 2:** Agar koi blast sound chal raha ho to use turant rok do (Play Again fix)
+    if (currentBlastSound) {
+        currentBlastSound.pause();
+        currentBlastSound.currentTime = 0;
+        currentBlastSound = null; 
+    }
+
   // Remove leftover tiles
   tiles.forEach(t=>container.removeChild(t.div));
   tiles=[];
@@ -125,10 +123,12 @@ function startGame(){
   requestAnimationFrame(gameLoop);
 }
 
-// **BADLAV 3:** Game over sound ko start hone se rokna
+// **BADLAV 4:** Game over screen (Blast sound ko record karna)
 function gameOverScreen(){
-    // Blast sound ko play karne se pehle reset
+    // Blast sound ka naya instance banao aur global variable mein store karo
     const blastSoundInstance = blastSoundTemplate.cloneNode();
+    currentBlastSound = blastSoundInstance; // Store the instance
+    
     blastSoundInstance.currentTime = 0;
     blastSoundInstance.play(); 
     
@@ -141,56 +141,16 @@ function gameOverScreen(){
     finalComboEl.innerText=combo;
     if(score>bestScore) bestScore=score;
     bestScoreOverEl.innerText='Best Score: '+bestScore;
-
-    // **FIX:** Sound ko thoda bajne ka time dete hain aur phir pause karte hain
-    setTimeout(() => {
-        blastSoundInstance.pause();
-        blastSoundInstance.currentTime = 0;
-    }, 1000); 
 }
 
 // Game loop (Same)
 function gameLoop(){
-  if(gameState!=='playing') return;
-  const now = Date.now();
-  const dt = (now-lastTime)/1000;
-  lastTime=now;
-
-  spawnTimer += dt*1000;
-  while(spawnTimer>=SPAWN_RATE){
-    spawnTimer-=SPAWN_RATE;
-    const col = Math.floor(Math.random()*COLUMNS);
-    const type = Math.random()>0.8?'bomb':'normal';
-    createTile(col,type);
-  }
-
-  // Move tiles
-  tiles.forEach(t=>{
-    t.y += speed*100*dt;
-    t.div.style.top = t.y+'px';
-  });
-
-  // Check missed normal tiles
-  const missed = tiles.filter(t=>t.y>container.clientHeight+20 && t.type==='normal');
-  missed.forEach(t=>{
-    lives--;
-    combo=0;
-    removeTile(t.id);
-    if(lives<=0) gameOverScreen(); 
-  });
-
-  updateStats();
-  requestAnimationFrame(gameLoop);
+// ... (Same)
 }
 
 // Column lines overlay (Same)
 function drawColumnLines(){
-  for(let i=1;i<COLUMNS;i++){
-    const line = document.createElement('div');
-    line.classList.add('column-line');
-    line.style.left = (i*(container.clientWidth/COLUMNS))+'px';
-    container.appendChild(line);
-  }
+// ... (Same)
 }
 drawColumnLines();
 
@@ -199,12 +159,7 @@ startBtn.addEventListener('click', startGame);
 playAgain.addEventListener('click', startGame);
 
 window.addEventListener('keydown', e=>{
-  if(gameState!=='playing') return;
-  const map={'1':0,'2':1,'3':2,'4':3,'q':0,'w':1,'e':2,'r':3};
-  const col = map[e.key.toLowerCase()];
-  if(col===undefined) return;
-  const tile = tiles.find(t=>t.col===col);
-  if(tile) handleTileTap(tile);
+// ... (Same)
 });
 
 // Unlock audio for mobile (Same)
