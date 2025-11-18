@@ -2,155 +2,88 @@ body, html {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
+  /* ⚠️ FONT CHANGE: 'Press Start 2P' applied */
+  font-family: 'Press Start 2P', cursive; 
+  font-size: 14px; /* Default font size adjust kiya kyunki pixelated fonts chote lagte hain */
+  
   background: linear-gradient(to bottom, #0f172a, #000);
   color: white;
-  overflow: hidden; /* Scroll bar rokne ke liye */
-  touch-action: none; /* Mobile zoom rokne ke liye */
-}
-
-#game {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%;
-  padding: 10px;
-  box-sizing: border-box;
-}
-
-#game-title {
-  text-align: center;
-  margin-top: 10px;
-  margin-bottom: 5px;
+  overflow: hidden; 
+  touch-action: none; 
 }
 
 #game-title h1 {
+  /* Title ke liye custom gradient rakhte hain ya sirf white */
   margin: 0;
-  font-size: 28px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  background: linear-gradient(to right, #06b6d4, #3b82f6, #8b5cf6);
+  font-size: 24px; /* Thoda chota kiya pixelated font ke liye */
+  font-weight: normal; /* Press Start 2P mein weight ka zyada farq nahi padta */
+  letter-spacing: 0; /* Letter spacing normal rakha */
+  /* Agar aap gradient chahte hain to ye lines uncomment rakhen: */
+  /* background: linear-gradient(to right, #06b6d4, #3b82f6, #8b5cf6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-}
-
-/* Stats Bar */
-#stats {
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-  max-width: 600px;
-  margin-bottom: 10px;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 15px;
-  border: 1px solid rgba(255,255,255,0.1);
-  backdrop-filter: blur(5px);
-  padding: 8px 0;
-}
-
-.stat-box {
-  text-align: center;
-  min-width: 60px;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); */
+  /* Agar plain white chahiye to ye do lines uncomment karein */
+  color: white;
+  text-shadow: none;
 }
 
 .label {
-  font-size: 10px;
+  font-size: 10px; /* Pixelated font mein default size */
   color: #aaa;
-  letter-spacing: 1px;
+  letter-spacing: 0;
 }
 
 .stat-box div:nth-child(2){
-  font-size: 22px;
-  font-weight: bold;
+  font-size: 18px; /* Score/Combo/Lives ke numbers */
+  font-weight: normal;
   color: #fff;
-  text-shadow: 0 0 5px cyan;
+  text-shadow: none; /* Shadow hataya for retro look */
 }
 
-/* Game Container */
-#game-container {
-  position: relative;
-  width: 100%;
-  max-width: 600px;
-  flex-grow: 1; /* Fill remaining height */
-  background: linear-gradient(to bottom, #000000, #0f172a);
-  border-radius: 12px;
-  border: 2px solid rgba(255,255,255,0.1);
-  box-shadow: 0 0 30px rgba(0,0,0,0.8);
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-
-/* Column Lines */
-.column-line {
-  position: absolute;
-  top:0;
-  bottom:0;
-  width: 1px;
-  background: rgba(255,255,255,0.1);
-}
-
-/* Tiles */
+/* Tiles text ko bhi pixelated rakhte hain */
 .tile {
-  position: absolute;
-  border-radius: 6px;
-  text-align: center;
-  font-size: 24px;
+  /* ... existing styles ... */
+  font-size: 20px; /* Tile text ke liye */
   color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-  transition: transform 0.05s;
+  /* ... existing styles ... */
 }
 
-.tile:active {
-    transform: scale(0.95);
+
+h1 { /* Menu aur Game Over screen ke titles */
+    font-size: 26px; /* Pixelated font ke liye size adjust kiya */
+    margin-bottom: 10px;
 }
 
-/* Menu and Game Over Screens */
-#menu, #game-over {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(8px);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  z-index: 100;
+p { /* Menu ki description */
+    font-size: 12px;
 }
 
-h1 { margin: 0; font-size: 32px; }
-
-/* Buttons */
-.button-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 80%;
-    max-width: 300px;
-}
-
+/* Buttons ko bhi retro look */
 button {
-  padding: 15px 30px;
-  font-size: 18px;
-  font-weight: bold;
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
+  padding: 12px 20px; /* Padding adjust kiya */
+  font-size: 14px; /* Button text size adjust kiya */
+  font-weight: normal;
+  border: 2px solid white; /* Retro border */
+  border-radius: 5px; /* Thode sharp corners */
+  background: #0000ff; /* Blue background */
+  box-shadow: 0 0 0 rgba(0,0,0,0); /* Shadow hataya */
   color: white;
-  background: linear-gradient(to right, #06b6d4, #3b82f6);
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
-  transition: transform 0.1s;
+  text-shadow: none;
+  transition: none; /* Smooth transitions hataya */
 }
 
-button:active { transform: scale(0.95); }
+button:active {
+    transform: none; /* Scale effect hataya */
+    background: #0000cc; /* Click hone par thoda darker blue */
+}
 
-/* Farcaster Share Button Specific Style */
 #share-btn {
-    background: linear-gradient(to right, #855DCD, #5a369c); /* Warpcast Purple */
-    box-shadow: 0 0 15px rgba(133, 93, 205, 0.4);
+    background: #855DCD; /* Farcaster purple */
+    border-color: white;
+    box-shadow: none;
+}
+#share-btn:active {
+    background: #5a369c;
 }
