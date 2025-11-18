@@ -29,11 +29,10 @@ const statsEl = document.getElementById('stats');
 let bestScore = localStorage.getItem('basedTilesBestScore') || 0;
 bestScore = parseInt(bestScore, 10); 
 
-// --- AUDIO SETUP ---
+// --- AUDIO SETUP (unchanged) ---
 const audioUrls = [];
 const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']; 
 
-// Populate audio URLs (F2 to C7 range)
 for (let octave = 2; octave <= 7; octave++) {
     for (let note of notes) {
         let noteName = note + octave;
@@ -42,7 +41,6 @@ for (let octave = 2; octave <= 7; octave++) {
         
         let encodedName = noteName.replace('#', '%23');
 
-        // Assuming sounds are in the correct path in your GitHub repo
         audioUrls.push({
             name: noteName,
             url: `https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/${encodedName}.mp3`
@@ -129,6 +127,7 @@ function createTile(col,type){
   tiles.push({id,col,y:-TILE_HEIGHT,type,div});
 }
 
+// 🎯 FIX 1: UI Logic - Start Game
 function startGame(){
   if (currentBlastSound) {
       currentBlastSound.pause();
@@ -142,11 +141,11 @@ function startGame(){
   gameState='playing';
   score=0; combo=0; lives=3; tileId=0; speed = 3; spawnTimer=0; lastTime=Date.now(); 
   
+  // Display only game elements
   statsEl.style.display='flex';
-  menu.style.display='none';
-  gameOver.style.display='none';
+  menu.style.display='none'; // Menu hide
+  gameOver.style.display='none'; // Game Over hide
   
-  // Draw column lines if not present
   if(container.querySelectorAll('.column-line').length === 0){
       for(let i=1;i<COLUMNS;i++){
         const line = document.createElement('div');
@@ -160,6 +159,7 @@ function startGame(){
   requestAnimationFrame(gameLoop);
 }
 
+// 🎯 FIX 1: UI Logic - Game Over
 function gameOverScreen(){
   gameState='gameOver';
   
@@ -176,14 +176,17 @@ function gameOverScreen(){
       localStorage.setItem('basedTilesBestScore', bestScore);
   }
 
-  gameOver.style.display='flex';
+  // Display only Game Over screen
+  gameOver.style.display='flex'; // Game Over show
+  menu.style.display='none'; // Menu hide
+  
   finalScoreEl.innerText=score;
   finalComboEl.innerText=combo;
   bestScoreOverEl.innerText='Best Score: '+bestScore; 
 }
 
 
-// --- GAME LOOP (Tile Generation Fix Applied) ---
+// --- GAME LOOP (Tiles Generation Fix Applied) ---
 function gameLoop(){
   if(gameState!=='playing') return;
   const now = Date.now();
@@ -191,7 +194,6 @@ function gameLoop(){
   lastTime=now;
 
   spawnTimer += dt*1000;
-  // CRITICAL FIX: Ensures tiles spawn regularly
   while(spawnTimer>=SPAWN_RATE){ 
     spawnTimer-=SPAWN_RATE; 
     const col = Math.floor(Math.random()*COLUMNS);
@@ -199,13 +201,11 @@ function gameLoop(){
     createTile(col,type);
   }
 
-  // Tile movement
   tiles.forEach(t=>{
     t.y += speed*100*dt;
     t.div.style.top = t.y+'px';
   });
 
-  // Check for missed tiles
   const missed = tiles.filter(t=>t.y > container.clientHeight && t.type==='normal');
   missed.forEach(t=>{
     lives--;
@@ -219,19 +219,17 @@ function gameLoop(){
 }
 
 
-// --- SHARE ON FARCASTER (Custom SVG Background and async/await Fix) ---
+// --- SHARE ON FARCASTER (async/await Fix and Base64 Reliability) ---
 if (shareBtn) {
-    // FIX: Made the handler async to use 'await'
+    // FIX: Click handler is now async (required for await)
     shareBtn.addEventListener('click', async () => { 
         if (gameState !== 'gameOver') {
             alert("Please finish the game first to share your score!");
             return;
         }
 
-        // ⚠️ STEP 1: CHANGE THIS URL TO YOUR ACTUAL DEPLOYED GAME LINK
         const gameLink = 'https://yourusername.github.io/BasedTiles/'; 
-
-        // ⚠️ STEP 2: CHANGE THIS URL TO YOUR UPLOADED SVG RAW URL
+        // ⚠️ Raw URL of your SVG file
         const svgImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/share_scorecard.svg'; 
 
         const canvas = document.createElement('canvas');
@@ -246,7 +244,6 @@ if (shareBtn) {
 
         let imageLoaded = false;
         
-        // Load image with a timeout
         const imageLoadPromise = new Promise(resolve => {
             const timeoutId = setTimeout(() => resolve(false), 5000); 
 
@@ -272,7 +269,7 @@ if (shareBtn) {
             ctx.font = '28px "Press Start 2P", monospace';
             ctx.textAlign = 'center';
             ctx.fillStyle = '#FFFFFF';
-            ctx.fillText('BASED TILES - SCORE CARD', canvas.width / 2, 80);
+            ctx.fillText('BASED TILES - SCORE CARD (FALLBACK)', canvas.width / 2, 80);
         }
 
         // --- Load Press Start 2P Font for Canvas ---
@@ -290,28 +287,28 @@ if (shareBtn) {
         // --- Dynamic Stats Drawing ---
         const SCORE_X_POS = 600; 
         
-        // Set font style (using Press Start 2P if loaded, else monospace)
         ctx.font = '28px "Press Start 2P", monospace'; 
         ctx.textAlign = 'right'; 
 
-        // SCORE VALUE (Adjust Y-coordinates based on your SVG layout)
         ctx.fillText(score, SCORE_X_POS, 220); 
-
-        // COMBO VALUE
         ctx.fillText(combo, SCORE_X_POS, 290); 
-        
-        // BEST SCORE VALUE
         ctx.fillText(bestScore, SCORE_X_POS, 360); 
         
         // --- SHARE ---
+        // Final Canvas to Image URL (Base64)
         const farcasterImageUrl = canvas.toDataURL('image/png'); 
         
         const text = `I just scored ${score} on BASED TILES! 🎵\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
         
+        // FIX: Ensuring the URL is correctly constructed and encoded
         const encodedEmbedUrl = encodeURIComponent(farcasterImageUrl);
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodedEmbedUrl}`;
         
+        // FIX 2: Open new window
         window.open(warpcastUrl, '_blank');
+        
+        // If the window doesn't open, it's usually blocked by the browser's pop-up blocker.
+        // Users might need to allow pop-ups for your site.
     });
 }
 
@@ -322,7 +319,6 @@ playAgain.addEventListener('click', startGame);
 
 window.addEventListener('keydown', e=>{
   if(gameState!=='playing') return;
-  // Key mapping for desktop/keyboard play
   const map={'1':0,'2':1,'3':2,'4':3,'q':0,'w':1,'e':2,'r':3};
   const col = map[e.key.toLowerCase()];
   if(col!==undefined){
@@ -331,7 +327,6 @@ window.addEventListener('keydown', e=>{
   }
 });
 
-// Play a dummy sound on first touch to enable subsequent audio playback on mobile
 window.addEventListener('touchstart', () => {
     if(pianoSoundTemplates.length > 0) {
         const dummy = pianoSoundTemplates[0].cloneNode();
