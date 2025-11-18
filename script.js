@@ -28,11 +28,11 @@ let bestScore = 0;
 
 // --- AUDIO SYSTEM: WEB AUDIOCONTEXT ---
 let audioContext = null;
-let pianoBuffers = []; // To hold all piano note audio data
+let pianoBuffers = []; 
 let blastBuffer = null;
 let currentBlastSource = null; // To control the playing blast sound
 
-// 1. Audio URLs generation (Same as before)
+// 1. Audio URLs generation
 const audioFileUrls = [];
 const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']; 
 
@@ -58,9 +58,17 @@ async function loadSound(url) {
 // Function to load all sounds on startup
 async function loadAllSounds() {
     try {
+        // Create or resume AudioContext on first interaction
         if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === 'suspended') {
+             await audioContext.resume();
+        }
         
+        // Agar sounds already loaded hain, toh skip karein
+        if (pianoBuffers.length > 0) return;
+
         // Load piano notes
+        startBtn.innerText = "Loading Audio...";
         const pianoPromises = audioFileUrls.map(loadSound);
         pianoBuffers = await Promise.all(pianoPromises);
         
@@ -68,20 +76,17 @@ async function loadAllSounds() {
         blastBuffer = await loadSound(blastFileUrl);
 
         console.log("All 60 piano sounds and blast sound loaded successfully!");
-        // Unlock start button if needed
-        startBtn.disabled = false;
         startBtn.innerText = "Start Game";
 
     } catch (e) {
         console.error("Error loading audio files:", e);
-        // Fallback for security/browser restrictions
         startBtn.innerText = "Start (Audio Loading Failed)";
     }
 }
 
-// Function to play a sound instantly using AudioContext (ZERO DELAY)
+// Function to play a sound instantly (ZERO DELAY)
 function playBuffer(buffer) {
-    if (!buffer || !audioContext) return null;
+    if (!buffer || !audioContext || audioContext.state !== 'running') return null;
     const source = audioContext.createBufferSource();
     source.buffer = buffer;
     source.connect(audioContext.destination);
@@ -147,9 +152,9 @@ function randomColor(){
   return colors[Math.floor(Math.random()*colors.length)];
 }
 
-// Start game (Added Blast Sound Stop)
+// Start game (Final working logic)
 function startGame(){
-    // **GAME OVER SOUND FIX:** Stop the blast sound instantly
+    // **FIX:** Stop the blast sound instantly
     if (currentBlastSource) {
         try { currentBlastSource.stop(); } catch (e) {}
         currentBlastSource = null;
@@ -160,6 +165,7 @@ function startGame(){
   tiles=[];
   gameState='playing';
   score=0; combo=0; lives=3; tileId=0; speed=2.5; spawnTimer=0; lastTime=Date.now();
+  
   statsEl.style.display='flex';
   menu.style.display='none';
   gameOver.style.display='none';
@@ -170,7 +176,9 @@ function startGame(){
 // Game over screen (Uses Web Audio API)
 function gameOverScreen(){
     // **BLAST SOUND FIX:** Play blast sound and store the source to stop it later
-    currentBlastSource = playBuffer(blastBuffer);
+    if (blastBuffer) {
+        currentBlastSource = playBuffer(blastBuffer);
+    }
     
     gameState='gameOver';
     statsEl.style.display='none';
@@ -187,6 +195,7 @@ function gameOverScreen(){
 function gameLoop(){
   if(gameState!=='playing') return;
   const now = Date.now();
+// ... (rest of the gameLoop function remains the same)
   const dt = (now-lastTime)/1000;
   lastTime=now;
 
@@ -229,7 +238,19 @@ function drawColumnLines(){
 drawColumnLines();
 
 // Event listeners
-startBtn.addEventListener('click', startGame);
+startBtn.addEventListener('click', () => {
+    // Load sounds on first click (this creates/resumes the AudioContext)
+    loadAllSounds().then(() => {
+        // Only start game if sounds were loaded successfully
+        if (pianoBuffers.length > 0) {
+             startGame(); 
+        } else {
+             // Agar sound load nahi hua, toh bhi game shuru karo lekin bina sound ke
+             startGame();
+        }
+    });
+});
+
 playAgain.addEventListener('click', startGame);
 
 window.addEventListener('keydown', e=>{
@@ -241,16 +262,5 @@ window.addEventListener('keydown', e=>{
   if(tile) handleTileTap(tile);
 });
 
-// **Zaroori Fix:** Load sounds when user interacts (Browser security)
-startBtn.addEventListener('click', () => {
-    if (!audioContext) {
-        loadAllSounds();
-    }
-});
-
-// Load sounds on first user interaction for better compatibility
-window.addEventListener('touchstart', loadAllSounds, { once: true });
-window.addEventListener('keydown', loadAllSounds, { once: true });
-
-// Start audio loading on page load attempt (but it needs user interaction to fully unlock)
+// Load sounds on page load attempt (but it needs user interaction to fully unlock audio)
 loadAllSounds();
