@@ -175,8 +175,15 @@ function gameOverScreen(){
 
 // --- SHARE ON FARCASTER ---
 shareBtn.addEventListener('click', () => {
-    const text = `I just scored ${score} on BASED TILES! 🎵💣\n\nCan you beat my combo of ${combo}?\n\n(Play on GitHub Pages)`;
-    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
+    // ⚠️ IMPORTANT: Replace 'YOUR_GITHUB_PAGES_URL_HERE' with your actual live game URL
+    const gameLink = 'YOUR_GITHUB_PAGES_URL_HERE'; // e.g., 'https://yourusername.github.io/BasedTiles/'
+
+    const text = `I just scored ${score} on BASED TILES! 🎵💣\n\nCan you beat my combo of ${combo}?`;
+    
+    // Now including the gameLink directly in the text
+    const farcasterText = `${text}\n\nPlay it here: ${gameLink}`; 
+
+    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(farcasterText)}`;
     window.open(url, '_blank');
 });
 
