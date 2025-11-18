@@ -3,40 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Magic Tiles</title>
+<title>Magic Tiles Farcaster</title>
 <link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/tone@next/build/Tone.js"></script>
 </head>
 <body>
 
-<h1 class="title">🎵 MAGIC TILES</h1>
+<div id="game">
+  <!-- Stats -->
+  <div id="stats">
+    <div>SCORE: <span id="score">0</span></div>
+    <div>COMBO: <span id="combo">0</span></div>
+    <div>LIVES: <span id="lives">❤️❤️❤️</span></div>
+  </div>
 
-<div id="stats">
-  <div>Score: <span id="score">0</span></div>
-  <div>Combo: <span id="combo">0</span></div>
-  <div>Lives: <span id="lives">❤️❤️❤️</span></div>
-</div>
+  <!-- Game container -->
+  <div id="game-container"></div>
 
-<div id="game-container">
-  <!-- Menu Screen -->
+  <!-- Menu -->
   <div id="menu">
-    <p class="menu-title">🎮 MAGIC TILES</p>
-    <p>Avoid the bombs! 💣</p>
+    <h1>🎵 MAGIC TILES</h1>
     <button id="start-btn">START GAME</button>
-    <p id="best-score"></p>
   </div>
 
-  <!-- Game Over Screen -->
+  <!-- Game Over -->
   <div id="game-over">
-    <p>💀 GAME OVER!</p>
-    <p>Score: <span id="final-score">0</span></p>
-    <p>Combo: <span id="final-combo">0</span></p>
+    <h1>💀 GAME OVER</h1>
+    <div>Score: <span id="final-score">0</span></div>
+    <div>Combo: <span id="final-combo">0</span></div>
+    <div id="best-score-over">Best Score: 0</div>
     <button id="play-again">PLAY AGAIN</button>
-    <p id="best-score-over"></p>
   </div>
 </div>
-
-<p class="instructions">⌨️ Keyboard: 1-4 or Q-W-E-R | 📱 Touch: Tap tiles</p>
 
 <script src="script.js"></script>
 </body>
