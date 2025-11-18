@@ -30,15 +30,18 @@ const finalComboEl = document.getElementById('final-combo');
 const bestScoreEl = document.getElementById('best-score');
 const bestScoreOverEl = document.getElementById('best-score-over');
 
+// Function to initialize audio
 async function initAudio() {
-  await Tone.start();
-  synth = new Tone.PolySynth(Tone.Synth, {
-    oscillator: { type: 'square' },
-    envelope: { attack:0.005, decay:0.15, sustain:0.1, release:0.1 }
-  }).toDestination();
+  if (!synth) {
+    await Tone.start();  // Unlock audio context
+    synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'square' },
+      envelope: { attack:0.005, decay:0.15, sustain:0.1, release:0.1 }
+    }).toDestination();
+  }
 }
-initAudio();
 
+// Play random note
 function playRandomNote() {
   if(!synth) return;
   const notes = ['C4','D4','E4','F4','G4','A4','B4','C5','D5','E5','F5','G5','A5'];
@@ -46,6 +49,7 @@ function playRandomNote() {
   synth.triggerAttackRelease(note, '0.1');
 }
 
+// Create a tile
 function createTile(col, type) {
   const id = tileId++;
   const colors = ['cyan','blue','purple','pink','red','orange'];
@@ -65,6 +69,7 @@ function createTile(col, type) {
   tiles.push({id,col,y:-TILE_HEIGHT,type,div});
 }
 
+// Handle tile tap
 function handleTileTap(id,type) {
   if(gameState!=='playing') return;
   const tileIndex = tiles.findIndex(t=>t.id===id);
@@ -88,13 +93,17 @@ function handleTileTap(id,type) {
   playRandomNote();
 }
 
+// Update stats display
 function updateStats() {
   scoreEl.innerText = score;
   comboEl.innerText = combo;
   livesEl.innerText = '❤️'.repeat(lives);
 }
 
-function startGame() {
+// Start a new game
+async function startGame() {
+  await initAudio(); // Ensure audio is unlocked
+
   // Remove leftover tiles
   tiles.forEach(t => {
       if(t.div && t.div.parentNode === container) container.removeChild(t.div);
@@ -111,6 +120,7 @@ function startGame() {
   requestAnimationFrame(gameLoop);
 }
 
+// Game over screen
 function gameOverScreen() {
   gameState='gameOver';
   statsEl.style.display='none';
@@ -129,6 +139,7 @@ function gameOverScreen() {
   bestScoreOverEl.innerText='Best Score: '+bestScore;
 }
 
+// Game loop
 function gameLoop(){
   if(gameState!=='playing') return;
   const now = Date.now();
@@ -163,6 +174,7 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
+// Event listeners
 startBtn.addEventListener('click', startGame);
 playAgain.addEventListener('click', startGame);
 
@@ -174,3 +186,8 @@ window.addEventListener('keydown', e=>{
   const tile = tiles.find(t=>t.col===col);
   if(tile) handleTileTap(tile.id,tile.type);
 });
+
+// Optional: touchstart to unlock mobile audio
+window.addEventListener('touchstart', async () => {
+  await initAudio();
+}, { once: true });
