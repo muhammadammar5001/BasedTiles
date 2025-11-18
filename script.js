@@ -1,21 +1,16 @@
+// Game constants
 const COLUMNS = 4;
 const TILE_HEIGHT = 100;
 const SPAWN_RATE = 400;
 const MAX_SPEED = 8;
 const SPEED_INCREMENT = 0.03;
 
+// Game variables
 let gameState = 'menu';
-let score = 0;
-let bestScore = 0;
-let combo = 0;
-let lives = 3;
+let score = 0, combo = 0, lives = 3, tileId = 0, speed = 2.5, spawnTimer = 0, lastTime = Date.now();
 let tiles = [];
-let tileId = 0;
-let speed = 2.5;
-let spawnTimer = 0;
-let lastTime = Date.now();
-let synth;
 
+// DOM elements
 const container = document.getElementById('game-container');
 const menu = document.getElementById('menu');
 const gameOver = document.getElementById('game-over');
@@ -24,95 +19,78 @@ const playAgain = document.getElementById('play-again');
 const scoreEl = document.getElementById('score');
 const comboEl = document.getElementById('combo');
 const livesEl = document.getElementById('lives');
-const statsEl = document.getElementById('stats');
 const finalScoreEl = document.getElementById('final-score');
 const finalComboEl = document.getElementById('final-combo');
-const bestScoreEl = document.getElementById('best-score');
 const bestScoreOverEl = document.getElementById('best-score-over');
+const statsEl = document.getElementById('stats');
 
-// Function to initialize audio
-async function initAudio() {
-  if (!synth) {
-    await Tone.start();  // Unlock audio context
-    synth = new Tone.PolySynth(Tone.Synth, {
-      oscillator: { type: 'square' },
-      envelope: { attack:0.005, decay:0.15, sustain:0.1, release:0.1 }
-    }).toDestination();
-  }
-}
+let bestScore = 0;
 
-// Play random note
-function playRandomNote() {
-  if(!synth) return;
-  const notes = ['C4','D4','E4','F4','G4','A4','B4','C5','D5','E5','F5','G5','A5'];
-  const note = notes[Math.floor(Math.random()*notes.length)];
-  synth.triggerAttackRelease(note, '0.1');
-}
+// Audio
+const tileSounds = [
+  new Audio('sounds/kick.wav'),
+  new Audio('sounds/snare.wav'),
+  new Audio('sounds/hihat.wav')
+];
+const bombSound = new Audio('sounds/blast.mp3');
 
-// Create a tile
-function createTile(col, type) {
-  const id = tileId++;
-  const colors = ['cyan','blue','purple','pink','red','orange'];
-  const color = colors[Math.floor(Math.random()*colors.length)];
-  const div = document.createElement('div');
-  div.classList.add('tile');
-  div.style.background = color;
-  div.style.left = (col * container.clientWidth / COLUMNS) + 'px';
-  div.style.width = (container.clientWidth / COLUMNS) + 'px';
-  div.style.height = TILE_HEIGHT + 'px';
-  div.style.top = -TILE_HEIGHT + 'px';
-  div.dataset.id = id;
-  div.dataset.type = type;
-  div.innerText = type==='bomb' ? '💣':'♪';
-  div.addEventListener('click', ()=> handleTileTap(id,type));
-  container.appendChild(div);
-  tiles.push({id,col,y:-TILE_HEIGHT,type,div});
-}
-
-// Handle tile tap
-function handleTileTap(id,type) {
-  if(gameState!=='playing') return;
-  const tileIndex = tiles.findIndex(t=>t.id===id);
-  if(tileIndex===-1) return;
-
-  if(type==='bomb'){
-    gameOverScreen();
-    playRandomNote();
-    return;
-  }
-
-  container.removeChild(tiles[tileIndex].div);
-  tiles.splice(tileIndex,1);
-
-  const points = 10;
-  const comboBonus = Math.floor(combo/3)*5;
-  score += points + comboBonus;
-  combo++;
-  speed = Math.min(MAX_SPEED,speed+SPEED_INCREMENT);
-  updateStats();
-  playRandomNote();
-}
-
-// Update stats display
+// Update stats
 function updateStats() {
   scoreEl.innerText = score;
   comboEl.innerText = combo;
   livesEl.innerText = '❤️'.repeat(lives);
 }
 
-// Start a new game
-async function startGame() {
-  await initAudio(); // Ensure audio is unlocked
+// Remove tile from DOM and array
+function removeTile(id){
+  const index = tiles.findIndex(t=>t.id===id);
+  if(index>-1){
+    container.removeChild(tiles[index].div);
+    tiles.splice(index,1);
+  }
+}
 
+// Handle tile tap
+function handleTileTap(tile){
+  if(gameState!=='playing') return;
+
+  if(tile.type==='bomb'){
+    bombSound.play();
+    gameOverScreen();
+    return;
+  }
+
+  tileSounds[Math.floor(Math.random()*tileSounds.length)].play();
+  removeTile(tile.id);
+  score += 10 + Math.floor(combo/3)*5;
+  combo++;
+  speed = Math.min(MAX_SPEED, speed + SPEED_INCREMENT);
+  updateStats();
+}
+
+// Create a tile
+function createTile(col,type){
+  const id = tileId++;
+  const div = document.createElement('div');
+  div.classList.add('tile');
+  div.style.width = container.clientWidth / COLUMNS + 'px';
+  div.style.height = TILE_HEIGHT + 'px';
+  div.style.left = col * (container.clientWidth / COLUMNS) + 'px';
+  div.style.top = -TILE_HEIGHT + 'px';
+  div.style.background = ['cyan','blue','purple','pink','red','orange'][Math.floor(Math.random()*6)];
+  div.innerText = type==='bomb'?'💣':'♪';
+  div.addEventListener('click',()=>handleTileTap({id,type,div}));
+  container.appendChild(div);
+  tiles.push({id,col,y:-TILE_HEIGHT,type,div});
+}
+
+// Start game
+function startGame(){
   // Remove leftover tiles
-  tiles.forEach(t => {
-      if(t.div && t.div.parentNode === container) container.removeChild(t.div);
-  });
-  tiles = [];
-
+  tiles.forEach(t=>container.removeChild(t.div));
+  tiles=[];
   gameState='playing';
-  score=0; combo=0; lives=3;
-  tileId=0; speed=2.5; spawnTimer=0; lastTime=Date.now();
+  score=0; combo=0; lives=3; tileId=0; speed=2.5; spawnTimer=0; lastTime=Date.now();
   statsEl.style.display='flex';
   menu.style.display='none';
   gameOver.style.display='none';
@@ -120,22 +98,16 @@ async function startGame() {
   requestAnimationFrame(gameLoop);
 }
 
-// Game over screen
-function gameOverScreen() {
+// Game over
+function gameOverScreen(){
   gameState='gameOver';
   statsEl.style.display='none';
-
-  // Remove leftover tiles
-  tiles.forEach(t => {
-      if(t.div && t.div.parentNode === container) container.removeChild(t.div);
-  });
-  tiles = [];
-
+  tiles.forEach(t=>container.removeChild(t.div));
+  tiles=[];
   gameOver.style.display='flex';
   finalScoreEl.innerText=score;
   finalComboEl.innerText=combo;
   if(score>bestScore) bestScore=score;
-  bestScoreEl.innerText='Best Score: '+bestScore;
   bestScoreOverEl.innerText='Best Score: '+bestScore;
 }
 
@@ -148,7 +120,7 @@ function gameLoop(){
 
   spawnTimer += dt*1000;
   while(spawnTimer>=SPAWN_RATE){
-    spawnTimer -= SPAWN_RATE;
+    spawnTimer-=SPAWN_RATE;
     const col = Math.floor(Math.random()*COLUMNS);
     const type = Math.random()>0.8?'bomb':'normal';
     createTile(col,type);
@@ -163,11 +135,8 @@ function gameLoop(){
   missed.forEach(t=>{
     lives--;
     combo=0;
-    container.removeChild(t.div);
-    tiles=tiles.filter(tile=>tile.id!==t.id);
-    if(lives<=0){
-      gameOverScreen();
-    }
+    removeTile(t.id);
+    if(lives<=0) gameOverScreen();
   });
 
   updateStats();
@@ -184,10 +153,8 @@ window.addEventListener('keydown', e=>{
   const col = map[e.key.toLowerCase()];
   if(col===undefined) return;
   const tile = tiles.find(t=>t.col===col);
-  if(tile) handleTileTap(tile.id,tile.type);
+  if(tile) handleTileTap(tile);
 });
 
 // Optional: touchstart to unlock mobile audio
-window.addEventListener('touchstart', async () => {
-  await initAudio();
-}, { once: true });
+window.addEventListener('touchstart', ()=>{}, { once:true });
