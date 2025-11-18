@@ -183,29 +183,76 @@ function gameOverScreen(){
   bestScoreOverEl.innerText='Best Score: '+bestScore;
 }
 
-// --- SHARE ON FARCASTER (Visual Image Generation) ---
-if(shareBtn) {
-    shareBtn.addEventListener('click', () => {
-        // 1. APNA GITHUB LINK YAHAN DALO
-        const gameLink = 'https://github.com/muhammadammar5001/BasedTiles'; 
+// ... (rest of your script.js code)
 
-        // 2. Image Prompt (Black BG, Blue Text #0000ff)
-        // Pollinations AI API use kar rahe hain jo URL se image banata hai
-        const prompt = `Black background, text "BASED TILES" in neon blue hex color #0000ff at top, 
-        list stats below: "Score" in white color value ${score} in blue #0000ff, 
-        "Combo" in white color value ${combo} in blue #0000ff, 
-        "Best Score" in white color value ${bestScore} in blue #0000ff. 
-        Minimalist digital HUD style. No other text.`;
+// --- SHARE ON FARCASTER (Canvas Image Generation) ---
+if(shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+        const gameLink = 'https://yourusername.github.io/BasedTiles/'; // Replace with your actual game URL
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = 800; // Farcaster embeds ke liye suitable size
+        canvas.height = 450;
+
+        // Background Draw karo - Solid Blue
+        ctx.fillStyle = '#0000ff'; // Blue background
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Title "Based Tiles"
+        ctx.font = 'bold 50px "Press Start 2P"'; // Retro font
+        ctx.fillStyle = '#FFFFFF'; // White color
+        ctx.textAlign = 'center';
+        ctx.fillText('Based Tiles', canvas.width / 2, 80); // Y position adjust kiya
+
+        // "Game Over"
+        ctx.font = '28px "Press Start 2P"';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText('Game Over', canvas.width / 2, 150);
+
+
+        // Stats (Score, Combo, Best Score)
+        ctx.textAlign = 'left';
+        const startX = canvas.width / 2 - 180; // Left align ke liye adjust kiya
+        let startY = 220;
+        const lineHeight = 70; // Lines ke beech zyada space
+
+        // SCORE
+        ctx.font = '22px "Press Start 2P"';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText('SCORE', startX, startY);
+        ctx.fillText(score, startX + 250, startY); // Value ko right align kiya
+        ctx.fillRect(startX, startY + 5, 400, 2); // Line draw ki
+        startY += lineHeight;
+
+        // COMBO
+        ctx.font = '22px "Press Start 2P"';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText('COMBO', startX, startY);
+        ctx.fillText(combo, startX + 250, startY);
+        ctx.fillRect(startX, startY + 5, 400, 2); // Line draw ki
+        startY += lineHeight;
+
+        // BEST SCORE
+        ctx.font = '22px "Press Start 2P"';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText('BEST SCORE', startX, startY);
+        ctx.fillText(bestScore, startX + 250, startY);
+        ctx.fillRect(startX, startY + 5, 400, 2); // Line draw ki
         
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true`;
+        // Canvas to Image URL
+        const farcasterImageUrl = canvas.toDataURL('image/png'); // PNG format
 
         const text = `I just scored ${score} on BASED TILES! 🎵\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
         
-        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(imageUrl)}`;
+        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(farcasterImageUrl)}`;
         
         window.open(warpcastUrl, '_blank');
     });
 }
+
+// ... (rest of your script.js code)
 
 // Game Loop
 function gameLoop(){
