@@ -318,10 +318,13 @@ if (shareBtn) {
         ctx.textAlign = 'right';
         ctx.fillText(bestScore, X_VALUE_POS, Y_START + 2 * Y_STEP);
         
-        // --- SHARE ---
+        
+                // --- 4. SHARE ---
+        // Final Base64 Image URL (Smallest possible size)
         const farcasterImageUrl = canvas.toDataURL('image/png'); 
         
-        const text = `I just scored ${score} on BASED TILES! 🎵\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
+        // 🎯 FIX: Best Score added to the plain text post
+        const text = `I just scored ${score} on BASED TILES! 🎵\nMy Best Score is ${bestScore}.\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
         
         const encodedEmbedUrl = encodeURIComponent(farcasterImageUrl);
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodedEmbedUrl}`;
@@ -329,6 +332,7 @@ if (shareBtn) {
         window.open(warpcastUrl, '_blank');
     });
 }
+
 
 
 // --- Initial Setup and Event Listeners (UNCHANGED) ---
