@@ -1,17 +1,17 @@
-// Game constants
+// Game constants (UNCHANGED)
 const COLUMNS = 4;
 const TILE_HEIGHT = 120;
 const SPAWN_RATE = 400;
 const MAX_SPEED = 12;
 const SPEED_INCREMENT = 0.04;
 
-// Game variables
+// Game variables (UNCHANGED)
 let gameState = 'menu';
 let score = 0, combo = 0, lives = 3, tileId = 0, speed = 3, spawnTimer = 0, lastTime = Date.now();
 let tiles = [];
 let currentBlastSound = null; 
 
-// DOM elements
+// DOM elements (UNCHANGED)
 const container = document.getElementById('game-container');
 const menu = document.getElementById('menu');
 const gameOver = document.getElementById('game-over');
@@ -22,14 +22,14 @@ const scoreEl = document.getElementById('score');
 const comboEl = document.getElementById('combo');
 const livesEl = document.getElementById('lives');
 const finalScoreEl = document.getElementById('final-score');
-const finalComboEl = document.getElementById('final-combo'); // Fix: Removed double assignment
+const finalComboEl = document.getElementById('final-combo'); 
 const bestScoreOverEl = document.getElementById('best-score-over');
 const statsEl = document.getElementById('stats');
 
 let bestScore = localStorage.getItem('basedTilesBestScore') || 0;
 bestScore = parseInt(bestScore, 10); 
 
-// --- AUDIO SETUP ---
+// --- AUDIO SETUP (UNCHANGED) ---
 const audioUrls = [];
 const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']; 
 
@@ -56,14 +56,14 @@ const pianoSoundTemplates = audioUrls.map(item => {
 
 const blastSoundTemplate = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/blast.mp3');
 
-// Update stats
+// Update stats (UNCHANGED)
 function updateStats() {
   scoreEl.innerText = score;
   comboEl.innerText = combo;
   livesEl.innerText = '❤️'.repeat(lives);
 }
 
-// Remove tile
+// Remove tile (UNCHANGED)
 function removeTile(id){
   const index = tiles.findIndex(t=>t.id===id);
   if(index>-1){
@@ -74,7 +74,7 @@ function removeTile(id){
   }
 }
 
-// --- HANDLE TAP ---
+// --- HANDLE TAP (UNCHANGED) ---
 function handleTileTap(tile){
   if(gameState !== 'playing') return;
 
@@ -98,7 +98,7 @@ function handleTileTap(tile){
   }
 }
 
-// Create Tile
+// Create Tile (UNCHANGED)
 function createTile(col,type){
   const id = tileId++;
   const div = document.createElement('div');
@@ -128,7 +128,7 @@ function randomColor(){
   return colors[Math.floor(Math.random()*colors.length)];
 }
 
-// --- START GAME ---
+// --- START GAME (UNCHANGED) ---
 function startGame(){
   if (currentBlastSound) {
       currentBlastSound.pause();
@@ -159,7 +159,7 @@ function startGame(){
   requestAnimationFrame(gameLoop);
 }
 
-// --- GAME OVER ---
+// --- GAME OVER (UNCHANGED) ---
 function gameOverScreen(){
   gameState='gameOver';
   
@@ -182,13 +182,12 @@ function gameOverScreen(){
   bestScoreOverEl.innerText='Best Score: '+bestScore; 
 }
 
-// --- SHARE ON FARCASTER (using your created image as background) ---
+// --- SHARE ON FARCASTER (CUSTOM IMAGE & FIXES) ---
 if(shareBtn) {
     shareBtn.addEventListener('click', async () => {
         const gameLink = 'https://yourusername.github.io/BasedTiles/'; // **REPLACE WITH YOUR ACTUAL GAME URL**
 
-        // **YOUR CUSTOM BACKGROUND IMAGE URL**
-        // Ensure this image is available publicly (e.g., in your GitHub repo)
+        // **YOUR CUSTOM BACKGROUND IMAGE URL - ENSURE THIS IS PUBLICLY ACCESSIBLE**
         const backgroundImageURL = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/share_bg.png'; 
 
         const canvas = document.createElement('canvas');
@@ -198,82 +197,96 @@ if(shareBtn) {
         canvas.height = 450;
 
         const img = new Image();
-        img.crossOrigin = 'Anonymous'; // Important for images from different domains (like GitHub raw)
+        img.crossOrigin = 'Anonymous'; 
         img.src = backgroundImageURL;
 
+        let imageLoaded = false;
         await new Promise(resolve => {
-            img.onload = resolve;
-            img.onerror = () => {
-                console.error("Failed to load background image for share. Using fallback blue background.");
-                resolve(); // Proceed even if image fails to load
+            img.onload = () => {
+                imageLoaded = true;
+                resolve();
+            };
+            img.onerror = (e) => {
+                console.error("Failed to load background image for share:", e);
+                // Fallback to blue background if image fails
+                ctx.fillStyle = '#0000ff'; 
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                resolve(); 
             };
         });
 
-        // Draw background image or fallback color
-        if (img.complete && img.naturalHeight !== 0) {
+        // Draw background image if loaded, else use fallback already set
+        if (imageLoaded) {
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        } else {
-            ctx.fillStyle = '#0000ff'; // Fallback to solid blue if image fails
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // --- Load Font for Canvas ---
+        // We need to ensure the font is loaded BEFORE drawing text
+        const fontUrl = 'https://fonts.gstatic.com/s/pressstart2p/v15/PFDZzYBfbfayzGWSDIZog_e_kqchbkkx0Yd6.woff2';
+        const fontFace = new FontFace('Press Start 2P', `url(${fontUrl})`);
+        try {
+            await fontFace.load();
+            document.fonts.add(fontFace);
+            console.log('Press Start 2P font loaded for Canvas.');
+        } catch (e) {
+            console.error('Failed to load Press Start 2P font for Canvas:', e);
+            // Fallback font if Press Start 2P fails to load
+            ctx.font = 'bold 30px Arial'; 
         }
 
         // --- Text Overlays (using Press Start 2P font) ---
-        // Load font for canvas (this is a separate step for Canvas, CSS doesn't apply here)
-        // This might take a moment, so ideally pre-load if possible
-        const fontFace = new FontFace('Press Start 2P', 'url(https://fonts.gstatic.com/s/pressstart2p/v15/PFDZzYBfbfayzGWSDIZog_e_kqchbkkx0Yd6.woff2)');
-        await fontFace.load();
-        document.fonts.add(fontFace);
+        ctx.fillStyle = '#FFFFFF'; // White color for all text
 
-
-        ctx.font = '36px "Press Start 2P"'; // Game Title
-        ctx.fillStyle = '#FFFFFF';
+        // Game Title
+        ctx.font = '36px "Press Start 2P"'; 
         ctx.textAlign = 'center';
         ctx.fillText('BASED TILES', canvas.width / 2, 80);
 
-        ctx.font = '24px "Press Start 2P"'; // Game Over
-        ctx.fillStyle = '#FFFFFF';
+        // Game Over
+        ctx.font = '24px "Press Start 2P"';
         ctx.fillText('GAME OVER', canvas.width / 2, 150);
 
+        // Stats
         ctx.textAlign = 'left';
         const startX = canvas.width / 2 - 180; 
         let startY = 220;
         const lineHeight = 70; 
         
-        // SCORE
         ctx.font = '20px "Press Start 2P"';
-        ctx.fillStyle = '#FFFFFF';
+
+        // SCORE
         ctx.fillText('SCORE', startX, startY);
         ctx.fillText(score, startX + 250, startY);
-        // ctx.fillRect(startX, startY + 5, 400, 2); // Uncomment if you want lines below stats
+        // ctx.fillRect(startX, startY + 5, 400, 2); // Uncomment if you want lines
         startY += lineHeight;
 
         // COMBO
-        ctx.font = '20px "Press Start 2P"';
-        ctx.fillStyle = '#FFFFFF';
         ctx.fillText('COMBO', startX, startY);
         ctx.fillText(combo, startX + 250, startY);
         // ctx.fillRect(startX, startY + 5, 400, 2); 
         startY += lineHeight;
 
         // BEST SCORE
-        ctx.font = '20px "Press Start 2P"';
-        ctx.fillStyle = '#FFFFFF';
         ctx.fillText('BEST SCORE', startX, startY);
         ctx.fillText(bestScore, startX + 250, startY);
         // ctx.fillRect(startX, startY + 5, 400, 2); 
         
-        // Canvas to Image URL
+        // Convert Canvas to Image URL
         const farcasterImageUrl = canvas.toDataURL('image/png'); 
-
+        
+        // Construct Warpcast URL
         const text = `I just scored ${score} on BASED TILES! 🎵\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
         
-        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(farcasterImageUrl)}`;
+        // Crucial for embeds - the URL must be encoded separately from the text
+        const encodedEmbedUrl = encodeURIComponent(farcasterImageUrl);
+        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodedEmbedUrl}`;
         
+        console.log("Warpcast URL:", warpcastUrl); // For debugging
         window.open(warpcastUrl, '_blank');
     });
 }
 
-// Game Loop
+// Game Loop (UNCHANGED, TILE SPAWN FIX ALREADY APPLIED HERE)
 function gameLoop(){
   if(gameState!=='playing') return;
   const now = Date.now();
@@ -281,11 +294,10 @@ function gameLoop(){
   lastTime=now;
 
   spawnTimer += dt*1000;
-  // ** CRITICAL FIX: SPASPAWN_RATE to SPAWN_RATE **
   while(spawnTimer>=SPAWN_RATE){ 
     spawnTimer-=SPAWN_RATE; 
     const col = Math.floor(Math.random()*COLUMNS);
-    const type = Math.random()>0.8?'bomb':'normal'; // 20% chance of bomb
+    const type = Math.random()>0.8?'bomb':'normal'; 
     createTile(col,type);
   }
 
@@ -306,7 +318,7 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
-// Initial Setup
+// Initial Setup (UNCHANGED)
 startBtn.addEventListener('click', startGame);
 playAgain.addEventListener('click', startGame);
 
