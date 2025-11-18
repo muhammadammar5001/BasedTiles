@@ -1,6 +1,6 @@
 // Game constants
 const COLUMNS = 4;
-const TILE_HEIGHT = 120; // Default height jo pehle chal raha tha
+const TILE_HEIGHT = 120;
 const SPAWN_RATE = 400;
 const MAX_SPEED = 12;
 const SPEED_INCREMENT = 0.04;
@@ -22,7 +22,7 @@ const scoreEl = document.getElementById('score');
 const comboEl = document.getElementById('combo');
 const livesEl = document.getElementById('lives');
 const finalScoreEl = document.getElementById('final-score');
-const finalComboEl = document = document.getElementById('final-combo'); // Fix: Double assignment
+const finalComboEl = document.getElementById('final-combo'); // Fix: Removed double assignment
 const bestScoreOverEl = document.getElementById('best-score-over');
 const statsEl = document.getElementById('stats');
 
@@ -140,7 +140,7 @@ function startGame(){
   tiles=[];
   
   gameState='playing';
-  score=0; combo=0; lives=3; tileId=0; speed = 3; spawnTimer=0; lastTime=Date.now(); // Speed reset to default
+  score=0; combo=0; lives=3; tileId=0; speed = 3; spawnTimer=0; lastTime=Date.now(); 
   
   statsEl.style.display='flex';
   menu.style.display='none';
@@ -182,18 +182,92 @@ function gameOverScreen(){
   bestScoreOverEl.innerText='Best Score: '+bestScore; 
 }
 
-// --- SHARE ON FARCASTER (using AI Image generation) ---
+// --- SHARE ON FARCASTER (using your created image as background) ---
 if(shareBtn) {
-    shareBtn.addEventListener('click', () => {
+    shareBtn.addEventListener('click', async () => {
         const gameLink = 'https://yourusername.github.io/BasedTiles/'; // **REPLACE WITH YOUR ACTUAL GAME URL**
 
-        const prompt = `Futuristic score card for "BASED TILES". Black background. Game Title "BASED TILES" in vibrant blue (#0000ff). Stat labels (Score, Combo, Best Score) in white. Stat values (${score}, ${combo}, ${bestScore}) in vibrant blue (#0000ff). Use a clean, digital, slightly retro font like Orbitron. No other text or elements.`;
+        // **YOUR CUSTOM BACKGROUND IMAGE URL**
+        // Ensure this image is available publicly (e.g., in your GitHub repo)
+        const backgroundImageURL = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/share_bg.png'; 
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = 800; 
+        canvas.height = 450;
+
+        const img = new Image();
+        img.crossOrigin = 'Anonymous'; // Important for images from different domains (like GitHub raw)
+        img.src = backgroundImageURL;
+
+        await new Promise(resolve => {
+            img.onload = resolve;
+            img.onerror = () => {
+                console.error("Failed to load background image for share. Using fallback blue background.");
+                resolve(); // Proceed even if image fails to load
+            };
+        });
+
+        // Draw background image or fallback color
+        if (img.complete && img.naturalHeight !== 0) {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        } else {
+            ctx.fillStyle = '#0000ff'; // Fallback to solid blue if image fails
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // --- Text Overlays (using Press Start 2P font) ---
+        // Load font for canvas (this is a separate step for Canvas, CSS doesn't apply here)
+        // This might take a moment, so ideally pre-load if possible
+        const fontFace = new FontFace('Press Start 2P', 'url(https://fonts.gstatic.com/s/pressstart2p/v15/PFDZzYBfbfayzGWSDIZog_e_kqchbkkx0Yd6.woff2)');
+        await fontFace.load();
+        document.fonts.add(fontFace);
+
+
+        ctx.font = '36px "Press Start 2P"'; // Game Title
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'center';
+        ctx.fillText('BASED TILES', canvas.width / 2, 80);
+
+        ctx.font = '24px "Press Start 2P"'; // Game Over
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText('GAME OVER', canvas.width / 2, 150);
+
+        ctx.textAlign = 'left';
+        const startX = canvas.width / 2 - 180; 
+        let startY = 220;
+        const lineHeight = 70; 
         
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true`;
+        // SCORE
+        ctx.font = '20px "Press Start 2P"';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText('SCORE', startX, startY);
+        ctx.fillText(score, startX + 250, startY);
+        // ctx.fillRect(startX, startY + 5, 400, 2); // Uncomment if you want lines below stats
+        startY += lineHeight;
+
+        // COMBO
+        ctx.font = '20px "Press Start 2P"';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText('COMBO', startX, startY);
+        ctx.fillText(combo, startX + 250, startY);
+        // ctx.fillRect(startX, startY + 5, 400, 2); 
+        startY += lineHeight;
+
+        // BEST SCORE
+        ctx.font = '20px "Press Start 2P"';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText('BEST SCORE', startX, startY);
+        ctx.fillText(bestScore, startX + 250, startY);
+        // ctx.fillRect(startX, startY + 5, 400, 2); 
+        
+        // Canvas to Image URL
+        const farcasterImageUrl = canvas.toDataURL('image/png'); 
 
         const text = `I just scored ${score} on BASED TILES! 🎵\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
         
-        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(imageUrl)}`;
+        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(farcasterImageUrl)}`;
         
         window.open(warpcastUrl, '_blank');
     });
@@ -207,10 +281,11 @@ function gameLoop(){
   lastTime=now;
 
   spawnTimer += dt*1000;
-  while(spawnTimer>=SPAWN_RATE){
-    spawnTimer-=SPASPAWN_RATE; // Fix: Double SPAWN_RATE was causing rapid spawns or no spawns
+  // ** CRITICAL FIX: SPASPAWN_RATE to SPAWN_RATE **
+  while(spawnTimer>=SPAWN_RATE){ 
+    spawnTimer-=SPAWN_RATE; 
     const col = Math.floor(Math.random()*COLUMNS);
-    const type = Math.random()>0.8?'bomb':'normal';
+    const type = Math.random()>0.8?'bomb':'normal'; // 20% chance of bomb
     createTile(col,type);
   }
 
