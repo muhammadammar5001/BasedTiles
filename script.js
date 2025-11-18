@@ -26,9 +26,13 @@ const statsEl = document.getElementById('stats');
 
 let bestScore = 0;
 
-// Audio (use raw GitHub URLs or host locally in Farcaster public folder)
-const bassSound = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/kick.wav');
-const blastSound = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/blast.mp3');
+// Audio (raw GitHub URLs)
+let bassSound, blastSound;
+
+function initAudio(){
+  bassSound = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/kick.wav');
+  blastSound = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/blast.mp3');
+}
 
 // Update stats
 function updateStats() {
@@ -86,9 +90,9 @@ function randomColor(){
   const colors = ['#06b6d4','#3b82f6','#8b5cf6','#ec4899','#f97316','#ef4444'];
   return colors[Math.floor(Math.random()*colors.length)];
 }
-
-// Start game
+// Start Game
 function startGame(){
+  initAudio(); // initialize audio on user click
   // Remove leftover tiles
   tiles.forEach(t=>container.removeChild(t.div));
   tiles=[];
@@ -100,6 +104,7 @@ function startGame(){
   updateStats();
   requestAnimationFrame(gameLoop);
 }
+
 
 // Game over
 function gameOverScreen(){
