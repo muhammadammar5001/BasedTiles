@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magic Tiles</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/tone@next/build/Tone.js"></script>
+</head>
+<body>
+
+<h1 class="title">🎵 MAGIC TILES</h1>
+
+<div id="stats">
+  <div>Score: <span id="score">0</span></div>
+  <div>Combo: <span id="combo">0</span></div>
+  <div>Lives: <span id="lives">❤️❤️❤️</span></div>
+</div>
+
+<div id="game-container">
+  <!-- Menu Screen -->
+  <div id="menu">
+    <p class="menu-title">🎮 MAGIC TILES</p>
+    <p>Avoid the bombs! 💣</p>
+    <button id="start-btn">START GAME</button>
+    <p id="best-score"></p>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="game-over">
+    <p>💀 GAME OVER!</p>
+    <p>Score: <span id="final-score">0</span></p>
+    <p>Combo: <span id="final-combo">0</span></p>
+    <button id="play-again">PLAY AGAIN</button>
+    <p id="best-score-over"></p>
+  </div>
+</div>
+
+<p class="instructions">⌨️ Keyboard: 1-4 or Q-W-E-R | 📱 Touch: Tap tiles</p>
+
+<script src="script.js"></script>
+</body>
+</html>
