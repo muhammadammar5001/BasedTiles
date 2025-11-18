@@ -182,13 +182,13 @@ function gameOverScreen(){
   bestScoreOverEl.innerText='Best Score: '+bestScore; 
 }
 
-// --- SHARE ON FARCASTER (CUSTOM IMAGE & FIXES) ---
+// --- SHARE ON FARCASTER (CUSTOM IMAGE - SVG Implementation) ---
 if(shareBtn) {
     shareBtn.addEventListener('click', async () => {
         const gameLink = 'https://yourusername.github.io/BasedTiles/'; // **REPLACE WITH YOUR ACTUAL GAME URL**
 
-        // **YOUR CUSTOM BACKGROUND IMAGE URL - ENSURE THIS IS PUBLICLY ACCESSIBLE**
-        const backgroundImageURL = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/share_bg.png'; 
+        // ⚠️ STEP 1: APNE UPLOAD KIYE GAYE SVG FILE KA RAW URL YAHAN PASTE KAREIN
+        const svgImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/share_scorecard.svg'; // <--- **PASTE YOUR RAW URL HERE**
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -198,7 +198,7 @@ if(shareBtn) {
 
         const img = new Image();
         img.crossOrigin = 'Anonymous'; 
-        img.src = backgroundImageURL;
+        img.src = svgImageUrl; // SVG ko as an Image load kiya
 
         let imageLoaded = false;
         await new Promise(resolve => {
@@ -207,13 +207,64 @@ if(shareBtn) {
                 resolve();
             };
             img.onerror = (e) => {
-                console.error("Failed to load background image for share:", e);
-                // Fallback to blue background if image fails
+                console.error("Failed to load SVG background image:", e);
+                // Fallback: Agar SVG fail ho jaye, toh plain blue background
                 ctx.fillStyle = '#0000ff'; 
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 resolve(); 
             };
         });
+
+        // SVG (Background) Draw karein
+        if (imageLoaded) {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        }
+
+        // --- STEP 2: DYNAMIC TEXT (SCORE, COMBO) DRAW KAREIN ---
+        
+        // Font Load Karein (Canvas ke liye)
+        const fontUrl = 'https://fonts.gstatic.com/s/pressstart2p/v15/PFDZzYBfbfayzGWSDIZog_e_kqchbkkx0Yd6.woff2';
+        const fontFace = new FontFace('Press Start 2P', `url(${fontUrl})`);
+        try {
+            await fontFace.load();
+            document.fonts.add(fontFace);
+        } catch (e) {
+            console.error('Failed to load Press Start 2P font for Canvas:', e);
+        }
+
+        ctx.fillStyle = '#FFFFFF'; // White text
+
+        // **COORDINATES FOR DYNAMIC VALUES (Adjust if necessary)**
+        // Assuming your static headings are aligned to the left/center, 
+        // we'll align the scores to the right for a clean look.
+        
+        const SCORE_X_POS = 600; // X position for score values (Right side)
+        
+        // Score value - Yahan Game Over Screen ka Title nahi likh rahe hain, bas Stats.
+        ctx.font = '28px "Press Start 2P"'; 
+        ctx.textAlign = 'right'; // Right align kiya values ko
+
+        // SCORE VALUE (Yahan Y-coordinate adjust karein)
+        ctx.fillText(score, SCORE_X_POS, 220); 
+
+        // COMBO VALUE
+        ctx.fillText(combo, SCORE_X_POS, 290); 
+        
+        // BEST SCORE VALUE
+        ctx.fillText(bestScore, SCORE_X_POS, 360); 
+        
+        // --- STEP 3: SHARE ---
+        const farcasterImageUrl = canvas.toDataURL('image/png'); 
+        
+        const text = `I just scored ${score} on BASED TILES! 🎵\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
+        
+        const encodedEmbedUrl = encodeURIComponent(farcasterImageUrl);
+        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodedEmbedUrl}`;
+        
+        console.log("Warpcast URL generated.");
+        window.open(warpcastUrl, '_blank');
+    });
+}
 
         // Draw background image if loaded, else use fallback already set
         if (imageLoaded) {
