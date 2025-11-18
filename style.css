@@ -16,24 +16,64 @@ body, html {
   box-sizing: border-box;
 }
 
+/* Stats Bar */
 #stats {
   display: flex;
   justify-content: space-around;
   width: 100%;
   max-width: 600px;
   margin-bottom: 10px;
+  background: linear-gradient(to bottom, #000000, #041316);  /* semi-transparent */
+  border-radius: 15px;                 /* rounded corners */
+  border: 2px solid rgba(255,255,255,0.2); /* subtle border */
+  backdrop-filter: blur(2px);          /* like backdrop-blur-sm */
+  padding: 10px 0;
 }
 
+.stat-box {
+  background: rgba(255,255,255,0.1);
+  padding: 10px 15px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.label {
+  font-size: 12px;
+  color: #ccc;
+}
+
+.stat-box div:nth-child(2){
+  font-size: 20px;
+  font-weight: bold;
+  color: #00ffff;
+}
+
+/* Game Container */
 #game-container {
   position: relative;
   width: 100%;
   max-width: 600px;
   height: 70vh;
-  background: #111;
-  border-radius: 15px;
+  background: linear-gradient(to bottom, #000000, #04171C); /* dark blue gradient */
+  border-radius: 20px;                 /* rounded corners */
+  border: 3px solid rgba(255,255,255,0.2); /* subtle border like Tailwind border-slate-700 */
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);  /* shadow like shadow-2xl */
   overflow: hidden;
+  margin-bottom: 15px;
 }
 
+
+
+/* Column Lines */
+.column-line {
+  position: absolute;
+  top:0;
+  bottom:0;
+  width:2px;
+  background: rgba(255,255,255,0.2);
+}
+
+/* Tiles */
 .tile {
   position: absolute;
   border-radius: 8px;
@@ -42,8 +82,10 @@ body, html {
   color: white;
   cursor: pointer;
   line-height: 100px;
+  transition: opacity 0.1s;
 }
 
+/* Menu and Game Over Screens */
 #menu, #game-over {
   position: absolute;
   inset: 0;
