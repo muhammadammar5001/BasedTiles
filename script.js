@@ -1,17 +1,15 @@
 // Game constants
 const COLUMNS = 4;
-const TILE_HEIGHT = 100;
+const TILE_HEIGHT = 120; // Thoda bada kiya better touch ke liye
 const SPAWN_RATE = 400;
-const MAX_SPEED = 8;
-const SPEED_INCREMENT = 0.03;
+const MAX_SPEED = 12; // Thoda speed limit badhaya
+const SPEED_INCREMENT = 0.04;
 
 // Game variables
 let gameState = 'menu';
-let score = 0, combo = 0, lives = 3, tileId = 0, speed = 2.5, spawnTimer = 0, lastTime = Date.now();
+let score = 0, combo = 0, lives = 3, tileId = 0, speed = 3, spawnTimer = 0, lastTime = Date.now();
 let tiles = [];
-
-// --- SOUND VARIABLES ---
-let currentBlastSound = null; // Sirf Blast sound ko control karne k liye
+let currentBlastSound = null; 
 
 // DOM elements
 const container = document.getElementById('game-container');
@@ -19,6 +17,7 @@ const menu = document.getElementById('menu');
 const gameOver = document.getElementById('game-over');
 const startBtn = document.getElementById('start-btn');
 const playAgain = document.getElementById('play-again');
+const shareBtn = document.getElementById('share-btn'); // New Share Button
 const scoreEl = document.getElementById('score');
 const comboEl = document.getElementById('combo');
 const livesEl = document.getElementById('lives');
@@ -29,7 +28,7 @@ const statsEl = document.getElementById('stats');
 
 let bestScore = 0;
 
-// --- 1. AUDIO LOAD SYSTEM (FIXED URL ENCODING) ---
+// --- 1. AUDIO SETUP (WITH URL FIX) ---
 const audioUrls = [];
 const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']; 
 
@@ -40,24 +39,20 @@ for (let octave = 2; octave <= 7; octave++) {
         if (octave === 2 && notes.indexOf(note) < notes.indexOf('f')) continue; 
         if (octave === 7 && note !== 'c') break;
         
-        // ⚠️ YAHAN FIX KIYA HAI: '#' ko '%23' se badal diya
-        // Isse browser ko pata chalega ki ye file ka naam hai, anchor nahi.
+        // ⚠️ IMPORTANT FIX: '#' -> '%23'
         let encodedName = noteName.replace('#', '%23');
 
         audioUrls.push({
-            name: noteName, // Ye display/debug ke liye normal rahega
+            name: noteName,
             url: `https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/${encodedName}.mp3`
         });
     }
 }
 
-// Templates Load Karo
+// Templates Load
 const pianoSoundTemplates = audioUrls.map(item => {
     const audio = new Audio(item.url);
-    // Error Listener: Ye batayega konsi file missing hai
-    audio.addEventListener('error', (e) => {
-        console.error(`❌ Sound Load Fail: ${item.name}.mp3 (Check GitHub filename)`);
-    });
+    audio.addEventListener('error', (e) => console.error(`❌ Fail: ${item.name}`));
     return audio;
 });
 
@@ -81,7 +76,7 @@ function removeTile(id){
   }
 }
 
-// --- 2. HANDLE TAP (OVERLAPPING SOUND) ---
+// --- HANDLE TAP ---
 function handleTileTap(tile){
   if(gameState !== 'playing') return;
 
@@ -90,30 +85,19 @@ function handleTileTap(tile){
     return;
   }
 
-  // Logic pehle
   removeTile(tile.id);
   score += 10 + Math.floor(combo/3)*5;
   combo++;
   speed = Math.min(MAX_SPEED, speed + SPEED_INCREMENT);
   updateStats();
 
-  // Sound baad mein (Overlapping Enabled)
+  // Play Sound (Overlapping)
   if(pianoSoundTemplates.length > 0) {
-      // Random template pick karo
       const randomIndex = Math.floor(Math.random() * pianoSoundTemplates.length);
       const baseSound = pianoSoundTemplates[randomIndex];
-      
-      // Clone banao taaki pichla sound na kate (Rich Piano Effect)
       const soundToPlay = baseSound.cloneNode(); 
       soundToPlay.volume = 1.0;
-      
-      // Play karo (Error handle k sath)
-      const playPromise = soundToPlay.play();
-      if (playPromise !== undefined) {
-          playPromise.catch(e => {
-              console.warn("Audio play blocked or file missing. Check Console for red errors.");
-          });
-      }
+      soundToPlay.play().catch(e => {});
   }
 }
 
@@ -129,7 +113,6 @@ function createTile(col,type){
   div.style.background = `linear-gradient(to bottom, ${randomColor()}, ${randomColor()})`;
   div.innerText = type==='bomb'?'💣':'♪';
   
-  // Touch/Click Events
   const triggerTap = (e) => {
       e.preventDefault(); 
       e.stopPropagation();
@@ -148,47 +131,39 @@ function randomColor(){
   return colors[Math.floor(Math.random()*colors.length)];
 }
 
-// --- 3. START GAME (STOP BLAST ONLY) ---
+// --- START GAME ---
 function startGame(){
-  // Sirf Blast sound ko roko, piano sounds ko gunjne do
   if (currentBlastSound) {
       currentBlastSound.pause();
       currentBlastSound.currentTime = 0;
       currentBlastSound = null; 
   }
 
-  tiles.forEach(t => {
-      if(container.contains(t.div)) container.removeChild(t.div);
-  });
+  container.innerHTML = ''; // Clear all visual tiles
   tiles=[];
   
   gameState='playing';
-  score=0; combo=0; lives=3; tileId=0; speed=2.5; spawnTimer=0; lastTime=Date.now();
+  score=0; combo=0; lives=3; tileId=0; speed=3; spawnTimer=0; lastTime=Date.now();
   
   statsEl.style.display='flex';
   menu.style.display='none';
   gameOver.style.display='none';
   
-  const existingLines = document.querySelectorAll('.column-line');
-  if(existingLines.length === 0) drawColumnLines();
-
+  drawColumnLines();
   updateStats();
   requestAnimationFrame(gameLoop);
 }
 
-// --- 4. GAME OVER ---
+// --- GAME OVER ---
 function gameOverScreen(){
   gameState='gameOver';
   
-  // Blast sound chalao aur store karo
   const blastInstance = blastSoundTemplate.cloneNode();
   currentBlastSound = blastInstance; 
-  blastInstance.play().catch(e => console.log(e));
+  blastInstance.play().catch(e => {});
 
   statsEl.style.display='none';
-  tiles.forEach(t => {
-      if(container.contains(t.div)) container.removeChild(t.div);
-  });
+  container.innerHTML = ''; 
   tiles=[];
   
   gameOver.style.display='flex';
@@ -198,6 +173,14 @@ function gameOverScreen(){
   bestScoreOverEl.innerText='Best Score: '+bestScore;
 }
 
+// --- SHARE ON FARCASTER ---
+shareBtn.addEventListener('click', () => {
+    const text = `I just scored ${score} on BASED TILES! 🎵💣\n\nCan you beat my combo of ${combo}?\n\n(Play on GitHub Pages)`;
+    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+});
+
+// Game Loop
 function gameLoop(){
   if(gameState!=='playing') return;
   const now = Date.now();
@@ -217,7 +200,7 @@ function gameLoop(){
     t.div.style.top = t.y+'px';
   });
 
-  const missed = tiles.filter(t=>t.y > container.clientHeight+20 && t.type==='normal');
+  const missed = tiles.filter(t=>t.y > container.clientHeight && t.type==='normal');
   missed.forEach(t=>{
     lives--;
     combo=0;
@@ -230,17 +213,18 @@ function gameLoop(){
 }
 
 function drawColumnLines(){
-  container.innerHTML = ''; 
-  for(let i=1;i<COLUMNS;i++){
-    const line = document.createElement('div');
-    line.classList.add('column-line');
-    line.style.left = (i*(container.clientWidth/COLUMNS))+'px';
-    container.appendChild(line);
+  // Only draw if empty
+  if(container.querySelectorAll('.column-line').length === 0){
+      for(let i=1;i<COLUMNS;i++){
+        const line = document.createElement('div');
+        line.classList.add('column-line');
+        line.style.left = (i*(container.clientWidth/COLUMNS))+'px';
+        container.appendChild(line);
+      }
   }
 }
 
-drawColumnLines();
-
+// Initial Setup
 startBtn.addEventListener('click', startGame);
 playAgain.addEventListener('click', startGame);
 
@@ -248,15 +232,16 @@ window.addEventListener('keydown', e=>{
   if(gameState!=='playing') return;
   const map={'1':0,'2':1,'3':2,'4':3,'q':0,'w':1,'e':2,'r':3};
   const col = map[e.key.toLowerCase()];
-  if(col===undefined) return;
-  const colTiles = tiles.filter(t => t.col === col).sort((a,b) => b.y - a.y);
-  if(colTiles.length > 0) handleTileTap(colTiles[0]);
+  if(col!==undefined){
+      const colTiles = tiles.filter(t => t.col === col).sort((a,b) => b.y - a.y);
+      if(colTiles.length > 0) handleTileTap(colTiles[0]);
+  }
 });
 
-// First touch unlock
+// Audio Unlock for Mobile
 window.addEventListener('touchstart', () => {
     if(pianoSoundTemplates.length > 0) {
         const dummy = pianoSoundTemplates[0].cloneNode();
-        dummy.play().then(() => { dummy.pause(); }).catch(()=>{});
+        dummy.play().then(() => dummy.pause()).catch(()=>{});
     }
 }, { once:true });
