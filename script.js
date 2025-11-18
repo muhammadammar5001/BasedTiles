@@ -1,17 +1,17 @@
-// Game constants
+// Game constants (UNCHANGED)
 const COLUMNS = 4;
 const TILE_HEIGHT = 120;
-const SPAWN_RATE = 400; // Time in ms between spawns
+const SPAWN_RATE = 400; 
 const MAX_SPEED = 12;
 const SPEED_INCREMENT = 0.04;
 
-// Game variables
+// Game variables (UNCHANGED)
 let gameState = 'menu';
 let score = 0, combo = 0, lives = 3, tileId = 0, speed = 3, spawnTimer = 0, lastTime = Date.now();
 let tiles = [];
 let currentBlastSound = null; 
 
-// DOM elements
+// DOM elements (UNCHANGED)
 const container = document.getElementById('game-container');
 const menu = document.getElementById('menu');
 const gameOver = document.getElementById('game-over');
@@ -29,7 +29,7 @@ const statsEl = document.getElementById('stats');
 let bestScore = localStorage.getItem('basedTilesBestScore') || 0;
 bestScore = parseInt(bestScore, 10); 
 
-// --- AUDIO SETUP (unchanged) ---
+// --- AUDIO SETUP (UNCHANGED) ---
 const audioUrls = [];
 const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']; 
 
@@ -57,7 +57,7 @@ const pianoSoundTemplates = audioUrls.map(item => {
 const blastSoundTemplate = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/blast.mp3');
 
 
-// --- Game Core Logic Functions ---
+// --- Game Core Logic Functions (UNCHANGED) ---
 
 function updateStats() {
   scoreEl.innerText = score;
@@ -127,7 +127,6 @@ function createTile(col,type){
   tiles.push({id,col,y:-TILE_HEIGHT,type,div});
 }
 
-// 🎯 FIX 1: UI Logic - Start Game
 function startGame(){
   if (currentBlastSound) {
       currentBlastSound.pause();
@@ -141,10 +140,9 @@ function startGame(){
   gameState='playing';
   score=0; combo=0; lives=3; tileId=0; speed = 3; spawnTimer=0; lastTime=Date.now(); 
   
-  // Display only game elements
   statsEl.style.display='flex';
-  menu.style.display='none'; // Menu hide
-  gameOver.style.display='none'; // Game Over hide
+  menu.style.display='none'; 
+  gameOver.style.display='none'; 
   
   if(container.querySelectorAll('.column-line').length === 0){
       for(let i=1;i<COLUMNS;i++){
@@ -159,7 +157,6 @@ function startGame(){
   requestAnimationFrame(gameLoop);
 }
 
-// 🎯 FIX 1: UI Logic - Game Over
 function gameOverScreen(){
   gameState='gameOver';
   
@@ -176,9 +173,8 @@ function gameOverScreen(){
       localStorage.setItem('basedTilesBestScore', bestScore);
   }
 
-  // Display only Game Over screen
-  gameOver.style.display='flex'; // Game Over show
-  menu.style.display='none'; // Menu hide
+  gameOver.style.display='flex'; 
+  menu.style.display='none'; 
   
   finalScoreEl.innerText=score;
   finalComboEl.innerText=combo;
@@ -186,7 +182,7 @@ function gameOverScreen(){
 }
 
 
-// --- GAME LOOP (Tiles Generation Fix Applied) ---
+// --- GAME LOOP (UNCHANGED) ---
 function gameLoop(){
   if(gameState!=='playing') return;
   const now = Date.now();
@@ -219,10 +215,13 @@ function gameLoop(){
 }
 
 
-// --- SHARE ON FARCASTER (Custom SVG Background and async/await Fix) ---
+// --- SHARE ON FARCASTER (SVG Debugging & Reliable Fallback) ---
 if (shareBtn) {
     shareBtn.addEventListener('click', async () => { 
-        // ... (existing code for gameState check) ...
+        if (gameState !== 'gameOver') {
+            alert("Please finish the game first to share your score!");
+            return;
+        }
 
         const gameLink = 'https://yourusername.github.io/BasedTiles/'; 
         const svgImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/share_scorecard.svg'; 
@@ -230,35 +229,96 @@ if (shareBtn) {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
-        // 🎯 FIX: Reduced Canvas size to get a shorter Base64 URL
+        // Canvas size: 600x338
         canvas.width = 600; 
         canvas.height = 338; 
 
-        // ... (existing code for img loading) ...
+        const img = new Image();
+        img.crossOrigin = 'Anonymous'; 
+        img.src = svgImageUrl; 
+
+        let imageLoaded = false;
         
-        // ... (existing code for font loading) ...
+        // Image Load Promise with Timeout
+        const imageLoadPromise = new Promise(resolve => {
+            const timeoutId = setTimeout(() => resolve(false), 5000); 
+
+            img.onload = () => {
+                clearTimeout(timeoutId);
+                imageLoaded = true;
+                resolve(true); 
+            };
+            // 🎯 CRITICAL DEBUGGING: Log image loading error
+            img.onerror = () => {
+                clearTimeout(timeoutId);
+                console.error("SVG Image Load FAILED. Using fallback canvas.");
+                resolve(false); 
+            };
+        });
+
+        const success = await imageLoadPromise;
+
+        // --- BACKGROUND DRAWING ---
+        if (success && imageLoaded) {
+            // Success: Draw SVG
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            console.log("SVG loaded successfully and drawn.");
+        } else {
+            // Failure: Draw reliable fallback background
+            ctx.fillStyle = '#1e3a8a'; // Dark Blue background
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw Fallback Title/Heading
+            ctx.font = '24px "Press Start 2P", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText('BASED TILES', canvas.width / 2, 40);
+            
+            // Draw a red line as a visual cue that fallback was used
+            ctx.fillStyle = '#dc2626';
+            ctx.fillRect(0, 50, canvas.width, 5);
+        }
+
+        // --- Load Press Start 2P Font for Canvas ---
+        const fontUrl = 'https://fonts.gstatic.com/s/pressstart2p/v15/PFDZzYBfbfayzGWSDIZog_e_kqchbkkx0Yd6.woff2';
+        const fontFace = new FontFace('Press Start 2P', `url(${fontUrl})`);
+        try {
+            await fontFace.load();
+            document.fonts.add(fontFace);
+        } catch (e) {
+            console.error('Failed to load Press Start 2P font for Canvas.');
+        }
 
         ctx.fillStyle = '#FFFFFF'; 
         
-        // --- Dynamic Stats Drawing (Coordinates Adjusted for 600px width) ---
-        // 🎯 FIX: Adjusted coordinates
-        const SCORE_X_POS = 450; // X position: (600 * 0.75) approx
-
-        // Font size bhi chota karna padega agar screen choti ki hai
-        ctx.font = '20px "Press Start 2P", monospace'; 
-        ctx.textAlign = 'right'; 
-
-        // SCORE VALUE (Approximate Y-coordinates for the new height)
-        ctx.fillText(score, SCORE_X_POS, 160); 
-
-        // COMBO VALUE
-        ctx.fillText(combo, SCORE_X_POS, 210); 
+        // --- Dynamic Stats Drawing ---
+        // Coordinates for 600x338 canvas
+        const X_HEAD_POS = 150; 
+        const X_VALUE_POS = 450; 
+        const Y_START = 160; 
+        const Y_STEP = 50;
         
-        // BEST SCORE VALUE
-        ctx.fillText(bestScore, SCORE_X_POS, 260); 
+        ctx.font = '16px "Press Start 2P", monospace'; 
+
+        // SCORE
+        ctx.textAlign = 'left';
+        ctx.fillText('SCORE', X_HEAD_POS, Y_START);
+        ctx.textAlign = 'right';
+        ctx.fillText(score, X_VALUE_POS, Y_START);
+
+        // COMBO
+        ctx.textAlign = 'left';
+        ctx.fillText('COMBO', X_HEAD_POS, Y_START + Y_STEP);
+        ctx.textAlign = 'right';
+        ctx.fillText(combo, X_VALUE_POS, Y_START + Y_STEP);
+        
+        // BEST SCORE
+        ctx.textAlign = 'left';
+        ctx.fillText('BEST SCORE', X_HEAD_POS, Y_START + 2 * Y_STEP);
+        ctx.textAlign = 'right';
+        ctx.fillText(bestScore, X_VALUE_POS, Y_START + 2 * Y_STEP);
         
         // --- SHARE ---
-        // Final Canvas to Image URL (Base64)
         const farcasterImageUrl = canvas.toDataURL('image/png'); 
         
         const text = `I just scored ${score} on BASED TILES! 🎵\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
@@ -270,9 +330,8 @@ if (shareBtn) {
     });
 }
 
-    
 
-// --- Initial Setup and Event Listeners ---
+// --- Initial Setup and Event Listeners (UNCHANGED) ---
 startBtn.addEventListener('click', startGame);
 playAgain.addEventListener('click', startGame);
 
