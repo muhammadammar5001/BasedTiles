@@ -223,71 +223,76 @@ if (shareBtn) {
             return;
         }
 
-        const gameLink = 'https://yourusername.github.io/BasedTiles/';
+        // OPEN POPUP EARLY (before any await)
+        const popup = window.open('', '_blank'); 
 
-        // USE PNG (SVG breaks Warpcast)
-        const pngTemplateUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/share_scorecard.png';
+        const gameLink = 'https://yourusername.github.io/BasedTiles/'; 
+        const svgImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/share_scorecard.svg'; 
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-
         canvas.width = 600;
         canvas.height = 338;
 
+        // LOAD IMAGE
         const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.src = pngTemplateUrl;
+        img.crossOrigin = 'Anonymous';
+        img.src = svgImageUrl;
 
         await new Promise(resolve => {
             img.onload = resolve;
             img.onerror = resolve;
         });
 
-        // Draw template PNG
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        // BACKGROUND
+        try {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        } catch {
+            ctx.fillStyle = '#1e3a8a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
 
-        // Load Press Start 2P font
-        const fontUrl = 'https://fonts.gstatic.com/s/pressstart2p/v15/PFDZzYBfbfayzGWSDIZog_e_kqchbkkx0Yd6.woff2';
-        const pressFont = new FontFace('Press Start 2P', `url(${fontUrl})`);
-        await pressFont.load();
-        document.fonts.add(pressFont);
+        // LOAD FONT
+        try {
+            const fontUrl = 'https://fonts.gstatic.com/s/pressstart2p/v15/PFDZzYBfbfayzGWSDIZog_e_kqchbkkx0Yd6.woff2';
+            const fontFace = new FontFace('Press Start 2P', `url(${fontUrl})`);
+            await fontFace.load();
+            document.fonts.add(fontFace);
+        } catch {}
 
-        ctx.fillStyle = "#ffffff";
-        ctx.textAlign = "left";
+        ctx.fillStyle = '#FFF';
         ctx.font = '16px "Press Start 2P"';
+        ctx.textAlign = 'left';
 
-        const X_HEAD = 100;
-        const X_VAL = 500;
-        const Y = 160, STEP = 50;
+        const XH = 100, XV = 500, Y = 160, STEP = 50;
 
-        ctx.fillText("SCORE:", X_HEAD, Y);
-        ctx.textAlign = "right";
-        ctx.fillText(score, X_VAL, Y);
+        ctx.fillText('SCORE:', XH, Y);
+        ctx.textAlign = 'right';
+        ctx.fillText(score, XV, Y);
 
-        ctx.textAlign = "left";
-        ctx.fillText("COMBO:", X_HEAD, Y + STEP);
-        ctx.textAlign = "right";
-        ctx.fillText(combo, X_VAL, Y + STEP);
+        ctx.textAlign = 'left';
+        ctx.fillText('COMBO:', XH, Y + STEP);
+        ctx.textAlign = 'right';
+        ctx.fillText(combo, XV, Y + STEP);
 
-        ctx.textAlign = "left";
-        ctx.fillText("BEST SCORE:", X_HEAD, Y + STEP * 2);
-        ctx.textAlign = "right";
-        ctx.fillText(bestScore, X_VAL, Y + STEP * 2);
+        ctx.textAlign = 'left';
+        ctx.fillText('BEST SCORE:', XH, Y + STEP * 2);
+        ctx.textAlign = 'right';
+        ctx.fillText(bestScore, XV, Y + STEP * 2);
 
-        // Share Image URL (Base64 too huge → upload instead)
-        const pngBase64 = canvas.toDataURL("image/png");
+        const pngUrl = canvas.toDataURL('image/png');
 
-        // --- IMPORTANT ---
-        // Upload PNG to GitHub or server automatically? Not possible client-side.
-        // So we embed the TEMPLATE PNG (small file) instead.
-        const embedImageUrl = pngTemplateUrl; 
+        const text = `I just scored ${score} on BASED TILES! 🎵
+My Best Score is ${bestScore}.
+Can you beat my combo of ${combo}?
 
-        const text = `I just scored ${score} on BASED TILES! 🎵\nMy Best Score is ${bestScore}.\nCan you beat my combo of ${combo}?\n\nPlay here: ${gameLink}`;
+Play here: ${gameLink}`;
 
-        const warpcastUrl =
-            `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds=${encodeURIComponent(embedImageUrl)}`;
+        const finalUrl =
+            `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(pngUrl)}`;
 
-        window.open(warpcastUrl, "_blank");
+        // USE THE POPUP WE OPENED EARLY
+        popup.location.href = finalUrl;
     });
 }
 
