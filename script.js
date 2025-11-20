@@ -215,60 +215,88 @@ function gameLoop(){
 }
 
 
-// --- SHARE ON FARCASTER (PNG + Press Start 2P + Working Embed) ---
+// --- SHARE ON FARCASTER (SAFE POPUP VERSION) ---
 if (shareBtn) {
-    
-      shareBtn.addEventListener('click', async () => {
-    if(gameState !== 'gameOver') return alert("Finish game first!");
+    shareBtn.addEventListener('click', async () => { 
+        if (gameState !== 'gameOver') {
+            alert("Finish the game first!");
+            return;
+        }
 
-    const gameLink = 'https://yourusername.github.io/BasedTiles/';
-    const svgImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/share_scorecard.svg';
-    
-    // 1️⃣ Popup pehle open karo
-    const warpcastPopup = window.open('', '_blank');
+        const gameLink = 'https://yourusername.github.io/BasedTiles/';
+        const svgImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/share_scorecard.png';
 
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 600;
-    canvas.height = 338;
+        // OPEN POPUP IMMEDIATELY (prevents about:blank)
+        const popup = window.open('about:blank', '_blank');
+        if (!popup) {
+            alert("Popup blocked! Allow popups for this site.");
+            return;
+        }
 
-    const img = new Image();
-    img.crossOrigin = 'Anonymous';
-    img.src = svgImageUrl;
+        // Canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = 600;
+        canvas.height = 338;
+        const ctx = canvas.getContext('2d');
 
-    const imageLoadPromise = new Promise(resolve => {
-        img.onload = () => resolve(true);
-        img.onerror = () => resolve(false);
-    });
+        // Load card image
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = svgImageUrl;
 
-    const loaded = await imageLoadPromise;
+        const loaded = await new Promise(res => {
+            img.onload = () => res(true);
+            img.onerror = () => res(false);
+        });
 
-    if(loaded){
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    } else {
-        ctx.fillStyle = '#1e3a8a';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.font = '24px "Press Start 2P"';
-        ctx.fillStyle = '#fff';
-        ctx.textAlign = 'center';
-        ctx.fillText('BASED TILES', canvas.width/2, 40);
-    }
+        if (loaded) {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        } else {
+            // fallback background
+            ctx.fillStyle = "#1e3a8a";
+            ctx.fillRect(0,0,600,338);
+        }
 
-    const farcasterImageUrl = canvas.toDataURL('image/png');
-    const text = `I just scored ${score} on BASED TILES! 🎵\nMy Best Score is ${bestScore}.\nCombo: ${combo}\nPlay here: ${gameLink}`;
+        // TEXT USING PRESS START 2P
+        const fontFace = new FontFace(
+            "Press Start 2P",
+            "url(https://fonts.gstatic.com/s/pressstart2p/v15/PFDZzYBfbfayzGWSDIZog_e_kqchbkkx0Yd6.woff2)"
+        );
+        await fontFace.load();
+        document.fonts.add(fontFace);
 
-    const encodedEmbedUrl = encodeURIComponent(farcasterImageUrl);
-    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodedEmbedUrl}`;
+        ctx.fillStyle = "#fff";
+        ctx.font = '16px "Press Start 2P"';
+        ctx.textAlign = "left";
+        ctx.fillText("SCORE:", 100, 160);
+        ctx.textAlign = "right";
+        ctx.fillText(score, 500, 160);
 
-    // 2️⃣ Popup ko final URL de do
-    warpcastPopup.location.href = warpcastUrl;
-});
+        ctx.textAlign = "left";
+        ctx.fillText("COMBO:", 100, 210);
+        ctx.textAlign = "right";
+        ctx.fillText(combo, 500, 210);
 
-        // USE THE POPUP WE OPENED EARLY
+        ctx.textAlign = "left";
+        ctx.fillText("BEST:", 100, 260);
+        ctx.textAlign = "right";
+        ctx.fillText(bestScore, 500, 260);
+
+        const imageURL = canvas.toDataURL("image/png");
+
+        const text = 
+`I just scored ${score} on BASED TILES! 🎵
+Best Score: ${bestScore}
+Combo: ${combo}
+
+Play here: ${gameLink}`;
+
+        const finalUrl =
+            `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(imageURL)}`;
+
         popup.location.href = finalUrl;
     });
-}
-
+} 
 
 // --- Initial Setup and Event Listeners (UNCHANGED) ---
 startBtn.addEventListener('click', startGame);
