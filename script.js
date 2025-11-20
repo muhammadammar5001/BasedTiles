@@ -217,79 +217,52 @@ function gameLoop(){
 
 // --- SHARE ON FARCASTER (PNG + Press Start 2P + Working Embed) ---
 if (shareBtn) {
-    shareBtn.addEventListener('click', async () => { 
-        if (gameState !== 'gameOver') {
-            alert("Please finish the game first to share your score!");
-            return;
-        }
+    
+      shareBtn.addEventListener('click', async () => {
+    if(gameState !== 'gameOver') return alert("Finish game first!");
 
-        // OPEN POPUP EARLY (before any await)
-        const popup = window.open('', '_blank'); 
+    const gameLink = 'https://yourusername.github.io/BasedTiles/';
+    const svgImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/share_scorecard.svg';
+    
+    // 1️⃣ Popup pehle open karo
+    const warpcastPopup = window.open('', '_blank');
 
-        const gameLink = 'https://yourusername.github.io/BasedTiles/'; 
-        const svgImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/share_scorecard.svg'; 
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 600;
+    canvas.height = 338;
 
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 600;
-        canvas.height = 338;
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = svgImageUrl;
 
-        // LOAD IMAGE
-        const img = new Image();
-        img.crossOrigin = 'Anonymous';
-        img.src = svgImageUrl;
+    const imageLoadPromise = new Promise(resolve => {
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+    });
 
-        await new Promise(resolve => {
-            img.onload = resolve;
-            img.onerror = resolve;
-        });
+    const loaded = await imageLoadPromise;
 
-        // BACKGROUND
-        try {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        } catch {
-            ctx.fillStyle = '#1e3a8a';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
+    if(loaded){
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = '#1e3a8a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.font = '24px "Press Start 2P"';
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.fillText('BASED TILES', canvas.width/2, 40);
+    }
 
-        // LOAD FONT
-        try {
-            const fontUrl = 'https://fonts.gstatic.com/s/pressstart2p/v15/PFDZzYBfbfayzGWSDIZog_e_kqchbkkx0Yd6.woff2';
-            const fontFace = new FontFace('Press Start 2P', `url(${fontUrl})`);
-            await fontFace.load();
-            document.fonts.add(fontFace);
-        } catch {}
+    const farcasterImageUrl = canvas.toDataURL('image/png');
+    const text = `I just scored ${score} on BASED TILES! 🎵\nMy Best Score is ${bestScore}.\nCombo: ${combo}\nPlay here: ${gameLink}`;
 
-        ctx.fillStyle = '#FFF';
-        ctx.font = '16px "Press Start 2P"';
-        ctx.textAlign = 'left';
+    const encodedEmbedUrl = encodeURIComponent(farcasterImageUrl);
+    const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodedEmbedUrl}`;
 
-        const XH = 100, XV = 500, Y = 160, STEP = 50;
-
-        ctx.fillText('SCORE:', XH, Y);
-        ctx.textAlign = 'right';
-        ctx.fillText(score, XV, Y);
-
-        ctx.textAlign = 'left';
-        ctx.fillText('COMBO:', XH, Y + STEP);
-        ctx.textAlign = 'right';
-        ctx.fillText(combo, XV, Y + STEP);
-
-        ctx.textAlign = 'left';
-        ctx.fillText('BEST SCORE:', XH, Y + STEP * 2);
-        ctx.textAlign = 'right';
-        ctx.fillText(bestScore, XV, Y + STEP * 2);
-
-        const pngUrl = canvas.toDataURL('image/png');
-
-        const text = `I just scored ${score} on BASED TILES! 🎵
-My Best Score is ${bestScore}.
-Can you beat my combo of ${combo}?
-
-Play here: ${gameLink}`;
-
-        const finalUrl =
-            `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(pngUrl)}`;
+    // 2️⃣ Popup ko final URL de do
+    warpcastPopup.location.href = warpcastUrl;
+});
 
         // USE THE POPUP WE OPENED EARLY
         popup.location.href = finalUrl;
