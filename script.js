@@ -213,7 +213,7 @@ function gameLoop(){
 }
 
 
-// --- 🟣 FINAL SIMPLE TEXT SHARE ---
+// --- 🟣 FINAL SIMPLE TEXT SHARE (Only Text) ---
 if (shareBtn) {
     shareBtn.addEventListener('click', () => { 
         if (gameState !== 'gameOver') {
@@ -229,7 +229,7 @@ if (shareBtn) {
         // Compose URL Create Karo (Only text)
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
         
-        // Simple window.open
+        // Simple window.open for maximum stability
         window.open(warpcastUrl, '_blank');
     });
 }
