@@ -6,7 +6,7 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #0f172a; /* Slate-900 */
+    background-color: #0f172a; /* Dark background */
     font-family: 'Press Start 2P', monospace;
     color: #ffffff;
     user-select: none;
@@ -14,11 +14,12 @@ body, html {
 }
 
 #game {
+    /* Max-width ko thoda badhaya aur viewport height use kiya */
     width: 100%;
-    max-width: 450px; /* Thoda bada kiya gaya */
+    max-width: 450px; 
     height: 100vh;
-    max-height: 850px;
-    background-color: #1e293b; /* Slate-800 */
+    max-height: 850px; /* Ensures it looks good on taller phones/frames */
+    background-color: #1e293b; 
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
@@ -32,7 +33,7 @@ body, html {
     background-color: #0f172a;
     border-bottom: 2px solid #334155;
     font-size: 10px;
-    height: 60px; /* Fixed height for better UI */
+    height: 60px; /* Fixed height for consistent look */
     align-items: center;
 }
 
@@ -50,7 +51,7 @@ body, html {
     font-size: 16px; 
 }
 
-/* --- Game Container --- */
+/* --- Game Container (Area where tiles fall) --- */
 #game-container {
     flex-grow: 1;
     position: relative;
@@ -101,7 +102,7 @@ body, html {
 
 #menu h1, #game-over h1 {
     font-size: 20px;
-    color: #38bdf8; /* Sky-400 */
+    color: #38bdf8;
     margin-bottom: 20px;
 }
 
@@ -118,7 +119,7 @@ body, html {
 }
 
 button {
-    background-color: #3b82f6; /* Blue-500 */
+    background-color: #3b82f6; 
     color: white;
     border: none;
     padding: 12px 20px;
@@ -127,11 +128,11 @@ button {
     cursor: pointer;
     transition: background-color 0.2s;
     border-radius: 4px;
-    box-shadow: 0 4px #1d4ed8; /* Blue-700 for depth */
+    box-shadow: 0 4px #1d4ed8;
 }
 
 button:hover {
-    background-color: #2563eb; /* Blue-600 */
+    background-color: #2563eb;
 }
 
 button:active {
