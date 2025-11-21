@@ -14,20 +14,19 @@
     "version": "1",
     "name": "Based Tiles Game",
     "homeUrl": "https://based-tiles.vercel.app", 
-    "iconUrl": "https://muhammadammar5001.github.io/BasedTiles/app_icon.png", 
-    "splashImageUrl": "https://muhammadammar5001.github.io/BasedTiles/splash_loading.png",
+    "iconUrl": "https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/app_icon.png", 
+    "splashImageUrl": "https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/splash_loading.png",
     "splashBackgroundColor": "#000000",
     "subtitle": "Tap the tiles, avoid the bombs!",
     "description": "A fun, fast-paced rhythm game built as a Mini App for the Farcaster and Base ecosystem.",
     "screenshotUrls": [
-      "https://muhammadammar5001.github.io/BasedTiles/screenshot_1.png"
-    ],
+      "https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/screenshot_1.png"],
     "primaryCategory": "games",
     "tags": ["game", "arcade", "music", "base"],
     "tagline": "Test your reflexes on Base.",
     "ogTitle": "Based Tiles | Play the Mini App",
     "ogDescription": "Play the Based Tiles Mini App directly on Farcaster or Base!",
-    "ogImageUrl": "https://muhammadammar5001.github.io/BasedTiles/og_image.png",
+    "ogImageUrl": "https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/og_image.png",
     "noindex": false 
   }
 }
