@@ -17,6 +17,9 @@ let score = 0, combo = 0, lives = 3, tileId = 0, speed = 3, spawnTimer = 0, last
 let tiles = [];
 let currentBlastSound = null; 
 
+// 🎯 NEW: Session ka maximum combo track karne ke liye variable
+let maxComboSession = 0;
+
 // DOM elements
 const container = document.getElementById('game-container');
 const menu = document.getElementById('menu');
@@ -30,15 +33,13 @@ const livesEl = document.getElementById('lives');
 const finalScoreEl = document.getElementById('final-score');
 const bestScoreOverEl = document.getElementById('best-score-over');
 const statsEl = document.getElementById('stats');
-
-// 🎯 NEW: Best Combo Element
 const bestComboOverEl = document.getElementById('best-combo-over');
 
 // Load Best Score
 let bestScore = localStorage.getItem('basedTilesBestScore') || 0;
 bestScore = parseInt(bestScore, 10); 
 
-// 🎯 NEW: Load Best Combo
+// Load Best Combo
 let bestCombo = localStorage.getItem('basedTilesBestCombo') || 0;
 bestCombo = parseInt(bestCombo, 10);
 
@@ -102,6 +103,12 @@ function handleTileTap(tile){
   removeTile(tile.id);
   score += 10 + Math.floor(combo/3)*5;
   combo++;
+  
+  // 🎯 FIX: Har tap pe check karo ki kya ye is session ka highest combo hai
+  if(combo > maxComboSession) {
+      maxComboSession = combo;
+  }
+
   speed = Math.min(MAX_SPEED, speed + SPEED_INCREMENT);
   updateStats();
 
@@ -150,7 +157,14 @@ function startGame(){
   tiles=[];
   
   gameState='playing';
-  score=0; combo=0; lives=3; tileId=0; speed = 3; spawnTimer=0; lastTime=Date.now(); 
+  score=0; 
+  combo=0; 
+  maxComboSession=0; // 🎯 Reset session max combo
+  lives=3; 
+  tileId=0; 
+  speed = 3; 
+  spawnTimer=0; 
+  lastTime=Date.now(); 
   
   statsEl.style.display='flex';
   menu.style.display='none'; 
@@ -186,16 +200,16 @@ function gameOverScreen(){
       localStorage.setItem('basedTilesBestScore', bestScore);
   }
 
-  // 🎯 NEW: Save Best Combo
-  if(combo > bestCombo) {
-      bestCombo = combo;
+  // 🎯 FIX: Compare with 'maxComboSession' instead of current 'combo' (which might be 0)
+  if(maxComboSession > bestCombo) {
+      bestCombo = maxComboSession;
       localStorage.setItem('basedTilesBestCombo', bestCombo);
   }
 
   gameOver.style.display='flex'; 
   menu.style.display='none'; 
   
-  // 🎯 Update UI Texts
+  // Update UI Texts
   finalScoreEl.innerText = score;
   bestScoreOverEl.innerText = bestScore; 
   bestComboOverEl.innerText = bestCombo;
@@ -223,7 +237,7 @@ function gameLoop(){
   const missed = tiles.filter(t=>t.y > container.clientHeight && t.type==='normal');
   missed.forEach(t=>{
     lives--;
-    combo=0; // Reset combo on miss
+    combo=0; // Ye reset kar deta tha, isliye humne maxComboSession banaya
     removeTile(t.id);
     if(lives<=0) gameOverScreen();
   });
@@ -243,8 +257,9 @@ if (shareBtn) {
 
         const gameLink = 'https://muhammadammar5001.github.io/BasedTiles/'; 
         
-        // 🎯 Updated Share Text with Stats
-        const text = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ Best Score: ${bestScore}\n🔥 Best Combo: ${bestCombo}\n\nCan you beat me? Play here: ${gameLink}`;
+        // Share Text
+        // Note: maxComboSession use kar rahe hain taaki share mein sahi combo dikhe
+        const text = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ Best Score: ${bestScore}\n🔥 Max Combo: ${maxComboSession}\n\nCan you beat me? Play here: ${gameLink}`;
         
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
         
