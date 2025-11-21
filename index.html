@@ -5,13 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Based Tiles</title>
 
-<meta property="og:title" content="Based Tiles Game">
-<meta property="og:description" content="Tap tiles, score high, avoid bombs! A mini-app for Farcaster.">
-<meta property="og:image" content="https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/score_card.png">
-<meta property="fc:frame" content="vNext">
-<meta property="fc:frame:image" content="https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/score_card.png">
-<meta property="fc:frame:button:1" content="Play Game">
-<meta property="fc:frame:action" content="link"> <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
@@ -51,9 +45,10 @@
 
   <div id="game-over">
     <h1>💀 GAME OVER</h1>
-    <div>Score: <span id="final-score">0</span></div>
-    <div>Combo: <span id="final-combo">0</span></div>
-    <div id="best-score-over">Best Score: 0</div>
+    
+    <div class="go-stat">SCORE: <span id="final-score">0</span></div>
+    <div class="go-stat" style="color: #4ade80;">BEST SCORE: <span id="best-score-over">0</span></div>
+    <div class="go-stat" style="color: #facc15;">BEST COMBO: <span id="best-combo-over">0</span></div>
     
     <div class="button-group">
         <button id="play-again">PLAY AGAIN</button>
