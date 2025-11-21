@@ -1,17 +1,25 @@
-// Game constants (UNCHANGED)
+// --- FARCASTER SDK INITIALIZATION ---
+// SDK ko module se import karne ke bajaye, hum globally available 'sdk' object use kar rahe hain
+// jo index.html mein load kiya gaya hai.
+if (typeof sdk !== 'undefined' && sdk.actions) {
+    sdk.actions.ready();
+}
+
+
+// Game constants
 const COLUMNS = 4;
 const TILE_HEIGHT = 120;
 const SPAWN_RATE = 400; 
 const MAX_SPEED = 12;
 const SPEED_INCREMENT = 0.04;
 
-// Game variables (UNCHANGED)
+// Game variables
 let gameState = 'menu';
 let score = 0, combo = 0, lives = 3, tileId = 0, speed = 3, spawnTimer = 0, lastTime = Date.now();
 let tiles = [];
 let currentBlastSound = null; 
 
-// DOM elements (UNCHANGED)
+// DOM elements
 const container = document.getElementById('game-container');
 const menu = document.getElementById('menu');
 const gameOver = document.getElementById('game-over');
@@ -26,10 +34,11 @@ const finalComboEl = document.getElementById('final-combo');
 const bestScoreOverEl = document.getElementById('best-score-over');
 const statsEl = document.getElementById('stats');
 
+// Load Best Score
 let bestScore = localStorage.getItem('basedTilesBestScore') || 0;
 bestScore = parseInt(bestScore, 10); 
 
-// --- AUDIO SETUP (UNCHANGED) ---
+// --- AUDIO SETUP ---
 const audioUrls = [];
 const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']; 
 
@@ -56,9 +65,7 @@ const pianoSoundTemplates = audioUrls.map(item => {
 
 const blastSoundTemplate = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/blast.mp3');
 
-
-// --- Game Core Logic Functions (UNCHANGED) ---
-
+// --- HELPER FUNCTIONS ---
 function updateStats() {
   scoreEl.innerText = score;
   comboEl.innerText = combo;
@@ -127,6 +134,7 @@ function createTile(col,type){
   tiles.push({id,col,y:-TILE_HEIGHT,type,div});
 }
 
+// --- GAME STATE ---
 function startGame(){
   if (currentBlastSound) {
       currentBlastSound.pause();
@@ -181,8 +189,6 @@ function gameOverScreen(){
   bestScoreOverEl.innerText='Best Score: '+bestScore; 
 }
 
-
-// --- GAME LOOP (UNCHANGED) ---
 function gameLoop(){
   if(gameState!=='playing') return;
   const now = Date.now();
@@ -215,90 +221,40 @@ function gameLoop(){
 }
 
 
-// --- SHARE ON FARCASTER (SAFE POPUP VERSION) ---
+// --- 🟣 FINAL SHARE ON FARCASTER (STATIC HOSTED IMAGE + SDK) ---
 if (shareBtn) {
-    shareBtn.addEventListener('click', async () => { 
+    shareBtn.addEventListener('click', () => { 
         if (gameState !== 'gameOver') {
-            alert("Finish the game first!");
+            alert("Please finish the game first to share your score!");
             return;
         }
 
-        const gameLink = 'https://yourusername.github.io/BasedTiles/';
-        const svgImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/share_scorecard.png';
-
-        // OPEN POPUP IMMEDIATELY (prevents about:blank)
-        const popup = window.open('about:blank', '_blank');
-        if (!popup) {
-            alert("Popup blocked! Allow popups for this site.");
-            return;
-        }
-
-        // Canvas
-        const canvas = document.createElement('canvas');
-        canvas.width = 600;
-        canvas.height = 338;
-        const ctx = canvas.getContext('2d');
-
-        // Load card image
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.src = svgImageUrl;
-
-        const loaded = await new Promise(res => {
-            img.onload = () => res(true);
-            img.onerror = () => res(false);
-        });
-
-        if (loaded) {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const gameLink = 'https://muhammadammar5001.github.io/BasedTiles/'; 
+        
+        // 🎯 CRITICAL FIX: Base64 Hata diya gaya. Ab seedha Hosted PNG URL use hoga.
+        // Yeh URL aapki 21.3 KB ki file ko load karega bina URL limit ko tode.
+        const hostedImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/score_card.png'; 
+        
+        // 2. Share Text Formatting (Dynamic Scores Text mein)
+        // Best Score aur Combo ko prominent (vazeh) kiya gaya hai.
+        const text = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ Best Score: ${bestScore}\n🔥 Combo: ${combo}\n\nCan you beat me? Play here: ${gameLink}`;
+        
+        // 3. Compose URL Create Karo (Short URL, No Base64 payload)
+        const encodedEmbedUrl = encodeURIComponent(hostedImageUrl);
+        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodedEmbedUrl}`;
+        
+        // 4. Farcaster SDK ka use karke Open karo (Reliable for Mini Apps)
+        if (typeof sdk !== 'undefined' && sdk.actions) {
+            sdk.actions.openUrl(warpcastUrl);
         } else {
-            // fallback background
-            ctx.fillStyle = "#1e3a8a";
-            ctx.fillRect(0,0,600,338);
+            // Fallback for desktop browsers if SDK is not detected
+            window.open(warpcastUrl, '_blank');
         }
-
-        // TEXT USING PRESS START 2P
-        const fontFace = new FontFace(
-            "Press Start 2P",
-            "url(https://fonts.gstatic.com/s/pressstart2p/v15/PFDZzYBfbfayzGWSDIZog_e_kqchbkkx0Yd6.woff2)"
-        );
-        await fontFace.load();
-        document.fonts.add(fontFace);
-
-        ctx.fillStyle = "#fff";
-        ctx.font = '16px "Press Start 2P"';
-        ctx.textAlign = "left";
-        ctx.fillText("SCORE:", 100, 160);
-        ctx.textAlign = "right";
-        ctx.fillText(score, 500, 160);
-
-        ctx.textAlign = "left";
-        ctx.fillText("COMBO:", 100, 210);
-        ctx.textAlign = "right";
-        ctx.fillText(combo, 500, 210);
-
-        ctx.textAlign = "left";
-        ctx.fillText("BEST:", 100, 260);
-        ctx.textAlign = "right";
-        ctx.fillText(bestScore, 500, 260);
-
-        const imageURL = canvas.toDataURL("image/png");
-
-        const text = 
-`I just scored ${score} on BASED TILES! 🎵
-Best Score: ${bestScore}
-Combo: ${combo}
-
-Play here: ${gameLink}`;
-
-        const finalUrl =
-            `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(imageURL)}`;
-
-        popup.location.href = finalUrl;
     });
-} 
+}
 
-// --- Initial Setup and Event Listeners (UNCHANGED) ---
+
+// --- Initial Setup and Event Listeners ---
 startBtn.addEventListener('click', startGame);
 playAgain.addEventListener('click', startGame);
 
@@ -313,6 +269,7 @@ window.addEventListener('keydown', e=>{
 });
 
 window.addEventListener('touchstart', () => {
+    // Ye dummy play function mobile devices par audio context ko unlock karta hai.
     if(pianoSoundTemplates.length > 0) {
         const dummy = pianoSoundTemplates[0].cloneNode();
         dummy.play().then(() => dummy.pause()).catch(()=>{});
