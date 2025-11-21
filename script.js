@@ -1,8 +1,13 @@
-// --- FARCASTER SDK SETUP ---
-import { sdk } from 'https://esm.sh/@farcaster/miniapp-sdk';
+// --- 🟣 FARCASTER SDK SETUP ---
+// Hum SDK import kar rahe hain, lekin error na aaye isliye try-catch ya check lagayenge
+import sdk from 'https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk@0.0.22/+esm';
 
-// App Ready Signal
-sdk.actions.ready();
+// App load hone par Farcaster ko batao hum ready hain
+try {
+    sdk.actions.ready();
+} catch (err) {
+    console.log("Not running inside Farcaster, skipping SDK ready check.");
+}
 
 // Game constants
 const COLUMNS = 4;
@@ -219,7 +224,7 @@ function gameLoop(){
 }
 
 
-// --- SHARE ON FARCASTER (Simple Text via SDK) ---
+// --- 🟣 FARCASTER SHARE LOGIC (With Fallback) ---
 if (shareBtn) {
     shareBtn.addEventListener('click', () => { 
         if (gameState !== 'gameOver') {
@@ -229,14 +234,24 @@ if (shareBtn) {
 
         const gameLink = 'https://muhammadammar5001.github.io/BasedTiles/'; 
         
+        // Simple Text Share
         const text = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ Best Score: ${bestScore}\n🔥 Combo: ${combo}\n\nCan you beat me? Play here: ${gameLink}`;
         
+        // Compose URL
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
         
-        // Use SDK if available, else simple open
-        if (typeof sdk !== 'undefined' && sdk.actions) {
-            sdk.actions.openUrl(warpcastUrl);
-        } else {
+        // 🎯 SMART SHARE LOGIC:
+        // Check karo ki SDK available hai ya nahi (yani hum Farcaster mein hain ya browser mein)
+        try {
+            if (sdk && sdk.actions) {
+                // Farcaster ke andar hain -> SDK use karo
+                sdk.actions.openUrl(warpcastUrl);
+            } else {
+                // Browser ke andar hain -> Window open karo
+                window.open(warpcastUrl, '_blank');
+            }
+        } catch (e) {
+            // Agar koi bhi error aye, toh safe fallback
             window.open(warpcastUrl, '_blank');
         }
     });
