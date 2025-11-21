@@ -1,142 +1,184 @@
+/* --- Base Styles: Apply Press Start 2P everywhere --- */
 body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #0f172a; /* Dark background */
-    font-family: 'Press Start 2P', monospace;
-    color: #ffffff;
-    user-select: none;
-    touch-action: manipulation;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  
+  font-family: 'Press Start 2P', cursive; 
+  font-size: 14px; /* Base size thoda bada kiya */
+  line-height: 1.5; 
+  
+  background: linear-gradient(to bottom, #0f172a, #000);
+  color: white;
+  overflow: hidden; 
+  touch-action: none; 
 }
 
 #game {
-    /* Max-width ko thoda badhaya aur viewport height use kiya */
-    width: 100%;
-    max-width: 450px; 
-    height: 100vh;
-    max-height: 850px; /* Ensures it looks good on taller phones/frames */
-    background-color: #1e293b; 
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-/* --- Stats Bar --- */
+/* --- Game Title (Top) --- */
+#game-title {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+#game-title h1 {
+  margin: 0;
+  font-size: 28px; /* Title size aur bada kiya */
+  font-weight: normal; 
+  letter-spacing: 2px;
+  background: linear-gradient(to right, #06b6d4, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+/* --- Stats Bar (SCORE, COMBO, LIVES) --- */
 #stats {
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
-    background-color: #0f172a;
-    border-bottom: 2px solid #334155;
-    font-size: 10px;
-    height: 60px; /* Fixed height for consistent look */
-    align-items: center;
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 5px; 
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(5px);
+  padding: 8px 0;
 }
 
 .stat-box {
-    text-align: center;
+  text-align: center;
+  min-width: 60px;
 }
 
-.stat-box .label {
-    font-size: 8px;
-    color: #94a3b8;
-    margin-bottom: 2px;
+.label {
+  font-size: 10px; /* Labels size thoda bada kiya */
+  color: #aaa;
+  letter-spacing: 1px;
 }
 
-#lives {
-    font-size: 16px; 
+.stat-box div:nth-child(2){
+  font-size: 18px; /* Numbers size aur bada kiya */
+  font-weight: normal;
+  color: #fff;
+  text-shadow: 0 0 5px cyan; 
 }
 
-/* --- Game Container (Area where tiles fall) --- */
+/* --- Game Container --- */
 #game-container {
-    flex-grow: 1;
-    position: relative;
-    overflow: hidden;
-    background-color: #1e293b;
-}
-
-.tile {
-    position: absolute;
-    box-sizing: border-box;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 24px;
-    color: #ffffff;
-    z-index: 10;
-    cursor: pointer;
-    transition: background-color 0.1s;
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  flex-grow: 1; 
+  background: linear-gradient(to bottom, #000000, #0f172a);
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.1);
+  box-shadow: 0 0 30px rgba(0,0,0,0.8);
+  overflow: hidden;
+  margin-bottom: 10px;
 }
 
 .column-line {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background-color: rgba(255, 255, 255, 0.1);
-    z-index: 5;
+  position: absolute;
+  top:0;
+  bottom:0;
+  width: 1px;
+  background: rgba(255,255,255,0.1);
 }
 
-/* --- Menu & Game Over Screens --- */
+/* --- Tiles --- */
+.tile {
+  position: absolute;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 24px; /* Tiles par text/emoji size aur bada kiya */
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  transition: transform 0.05s;
+}
+
+.tile:active {
+    transform: scale(0.95);
+}
+
+/* --- Menu and Game Over Screens --- */
 #menu, #game-over {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(15, 23, 42, 0.95);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    z-index: 20;
-    padding: 20px;
-    box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.9); 
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  z-index: 100;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 #menu h1, #game-over h1 {
-    font-size: 20px;
-    color: #38bdf8;
-    margin-bottom: 20px;
+  font-size: 24px; /* Titles size aur bada kiya */
+  margin: 0;
+  text-align: center;
+  line-height: 1.5;
 }
 
-#game-over div {
-    margin: 5px 0;
-    font-size: 14px;
+#menu p, #game-over div {
+  font-size: 12px; /* General text size thoda bada kiya */
+  text-align: center;
+  line-height: 1.5;
 }
 
+#game-over #final-score, 
+#game-over #final-combo, 
+#game-over #best-score-over {
+    font-size: 16px; /* Game Over stats size thoda bada kiya */
+    margin-top: 5px;
+}
+
+
+/* --- Buttons --- */
 .button-group {
-    margin-top: 30px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    width: 80%;
+    max-width: 300px;
 }
 
 button {
-    background-color: #3b82f6; 
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 12px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    border-radius: 4px;
-    box-shadow: 0 4px #1d4ed8;
+  padding: 15px 25px; /* Button padding thoda adjust kiya */
+  font-size: 12px; /* Button text size thoda bada kiya */
+  font-weight: normal;
+  border: none;
+  border-radius: 5px; 
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(to right, #06b6d4, #3b82f6);
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.4); 
+  transition: transform 0.1s ease;
 }
 
-button:hover {
-    background-color: #2563eb;
+button:active { 
+    background: linear-gradient(to right, #059cb8, #2e6bd6); 
+    transform: scale(0.98);
 }
 
-button:active {
-    background-color: #1d4ed8;
-    box-shadow: 0 2px #1d4ed8;
-    transform: translateY(2px);
+#share-btn {
+    background: linear-gradient(to right, #855DCD, #5a369c);
+    box-shadow: 0 0 10px rgba(133, 93, 205, 0.4);
 }
