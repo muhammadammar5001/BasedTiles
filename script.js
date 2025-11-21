@@ -1,11 +1,3 @@
-// --- FARCASTER SDK INITIALIZATION ---
-// SDK ko module se import karne ke bajaye, hum globally available 'sdk' object use kar rahe hain
-// jo index.html mein load kiya gaya hai.
-if (typeof sdk !== 'undefined' && sdk.actions) {
-    sdk.actions.ready();
-}
-
-
 // Game constants
 const COLUMNS = 4;
 const TILE_HEIGHT = 120;
@@ -38,7 +30,7 @@ const statsEl = document.getElementById('stats');
 let bestScore = localStorage.getItem('basedTilesBestScore') || 0;
 bestScore = parseInt(bestScore, 10); 
 
-// --- AUDIO SETUP ---
+// --- AUDIO SETUP (UNCHANGED) ---
 const audioUrls = [];
 const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']; 
 
@@ -65,7 +57,7 @@ const pianoSoundTemplates = audioUrls.map(item => {
 
 const blastSoundTemplate = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/blast.mp3');
 
-// --- HELPER FUNCTIONS ---
+// --- HELPER FUNCTIONS (UNCHANGED) ---
 function updateStats() {
   scoreEl.innerText = score;
   comboEl.innerText = combo;
@@ -134,7 +126,7 @@ function createTile(col,type){
   tiles.push({id,col,y:-TILE_HEIGHT,type,div});
 }
 
-// --- GAME STATE ---
+// --- GAME STATE (UNCHANGED) ---
 function startGame(){
   if (currentBlastSound) {
       currentBlastSound.pause();
@@ -221,7 +213,7 @@ function gameLoop(){
 }
 
 
-// --- 🟣 FINAL SHARE ON FARCASTER (STATIC HOSTED IMAGE + SDK) ---
+// --- 🟣 FINAL SIMPLE TEXT SHARE ---
 if (shareBtn) {
     shareBtn.addEventListener('click', () => { 
         if (gameState !== 'gameOver') {
@@ -231,30 +223,19 @@ if (shareBtn) {
 
         const gameLink = 'https://muhammadammar5001.github.io/BasedTiles/'; 
         
-        // 🎯 CRITICAL FIX: Base64 Hata diya gaya. Ab seedha Hosted PNG URL use hoga.
-        // Yeh URL aapki 21.3 KB ki file ko load karega bina URL limit ko tode.
-        const hostedImageUrl = 'https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/score_card.png'; 
-        
-        // 2. Share Text Formatting (Dynamic Scores Text mein)
-        // Best Score aur Combo ko prominent (vazeh) kiya gaya hai.
+        // Sirf Text Content (Koi Embeds nahi)
         const text = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ Best Score: ${bestScore}\n🔥 Combo: ${combo}\n\nCan you beat me? Play here: ${gameLink}`;
         
-        // 3. Compose URL Create Karo (Short URL, No Base64 payload)
-        const encodedEmbedUrl = encodeURIComponent(hostedImageUrl);
-        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodedEmbedUrl}`;
+        // Compose URL Create Karo (Only text)
+        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
         
-        // 4. Farcaster SDK ka use karke Open karo (Reliable for Mini Apps)
-        if (typeof sdk !== 'undefined' && sdk.actions) {
-            sdk.actions.openUrl(warpcastUrl);
-        } else {
-            // Fallback for desktop browsers if SDK is not detected
-            window.open(warpcastUrl, '_blank');
-        }
+        // Simple window.open
+        window.open(warpcastUrl, '_blank');
     });
 }
 
 
-// --- Initial Setup and Event Listeners ---
+// --- Initial Setup and Event Listeners (UNCHANGED) ---
 startBtn.addEventListener('click', startGame);
 playAgain.addEventListener('click', startGame);
 
@@ -269,7 +250,6 @@ window.addEventListener('keydown', e=>{
 });
 
 window.addEventListener('touchstart', () => {
-    // Ye dummy play function mobile devices par audio context ko unlock karta hai.
     if(pianoSoundTemplates.length > 0) {
         const dummy = pianoSoundTemplates[0].cloneNode();
         dummy.play().then(() => dummy.pause()).catch(()=>{});
