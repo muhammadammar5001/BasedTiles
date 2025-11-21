@@ -13,7 +13,7 @@
   "miniapp": {
     "version": "1",
     "name": "Based Tiles Game",
-    "homeUrl": "https://muhammadammar5001.github.io/BasedTiles/", 
+    "homeUrl": "https://based-tiles.vercel.app", 
     "iconUrl": "https://muhammadammar5001.github.io/BasedTiles/app_icon.png", 
     "splashImageUrl": "https://muhammadammar5001.github.io/BasedTiles/splash_loading.png",
     "splashBackgroundColor": "#000000",
