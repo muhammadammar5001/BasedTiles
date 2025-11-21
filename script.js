@@ -1,13 +1,8 @@
-// --- 🟣 FARCASTER SDK SETUP ---
-// Hum SDK import kar rahe hain, lekin error na aaye isliye try-catch ya check lagayenge
-import sdk from 'https://cdn.jsdelivr.net/npm/@farcaster/frame-sdk@0.0.22/+esm';
+// --- FARCASTER SDK SETUP ---
+import { sdk } from 'https://esm.sh/@farcaster/miniapp-sdk';
 
-// App load hone par Farcaster ko batao hum ready hain
-try {
-    sdk.actions.ready();
-} catch (err) {
-    console.log("Not running inside Farcaster, skipping SDK ready check.");
-}
+// App Ready Signal
+try { sdk.actions.ready(); } catch(e) {}
 
 // Game constants
 const COLUMNS = 4;
@@ -33,13 +28,19 @@ const scoreEl = document.getElementById('score');
 const comboEl = document.getElementById('combo');
 const livesEl = document.getElementById('lives');
 const finalScoreEl = document.getElementById('final-score');
-const finalComboEl = document.getElementById('final-combo'); 
 const bestScoreOverEl = document.getElementById('best-score-over');
 const statsEl = document.getElementById('stats');
+
+// 🎯 NEW: Best Combo Element
+const bestComboOverEl = document.getElementById('best-combo-over');
 
 // Load Best Score
 let bestScore = localStorage.getItem('basedTilesBestScore') || 0;
 bestScore = parseInt(bestScore, 10); 
+
+// 🎯 NEW: Load Best Combo
+let bestCombo = localStorage.getItem('basedTilesBestCombo') || 0;
+bestCombo = parseInt(bestCombo, 10);
 
 // --- AUDIO SETUP ---
 const audioUrls = [];
@@ -179,17 +180,25 @@ function gameOverScreen(){
   container.innerHTML = ''; 
   tiles=[];
   
+  // Save Best Score
   if(score > bestScore) {
       bestScore = score;
       localStorage.setItem('basedTilesBestScore', bestScore);
   }
 
+  // 🎯 NEW: Save Best Combo
+  if(combo > bestCombo) {
+      bestCombo = combo;
+      localStorage.setItem('basedTilesBestCombo', bestCombo);
+  }
+
   gameOver.style.display='flex'; 
   menu.style.display='none'; 
   
-  finalScoreEl.innerText=score;
-  finalComboEl.innerText=combo;
-  bestScoreOverEl.innerText='Best Score: '+bestScore; 
+  // 🎯 Update UI Texts
+  finalScoreEl.innerText = score;
+  bestScoreOverEl.innerText = bestScore; 
+  bestComboOverEl.innerText = bestCombo;
 }
 
 function gameLoop(){
@@ -214,7 +223,7 @@ function gameLoop(){
   const missed = tiles.filter(t=>t.y > container.clientHeight && t.type==='normal');
   missed.forEach(t=>{
     lives--;
-    combo=0;
+    combo=0; // Reset combo on miss
     removeTile(t.id);
     if(lives<=0) gameOverScreen();
   });
@@ -224,7 +233,7 @@ function gameLoop(){
 }
 
 
-// --- 🟣 FARCASTER SHARE LOGIC (With Fallback) ---
+// --- SHARE ON FARCASTER (Text Only) ---
 if (shareBtn) {
     shareBtn.addEventListener('click', () => { 
         if (gameState !== 'gameOver') {
@@ -234,24 +243,18 @@ if (shareBtn) {
 
         const gameLink = 'https://muhammadammar5001.github.io/BasedTiles/'; 
         
-        // Simple Text Share
-        const text = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ Best Score: ${bestScore}\n🔥 Combo: ${combo}\n\nCan you beat me? Play here: ${gameLink}`;
+        // 🎯 Updated Share Text with Stats
+        const text = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ Best Score: ${bestScore}\n🔥 Best Combo: ${bestCombo}\n\nCan you beat me? Play here: ${gameLink}`;
         
-        // Compose URL
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
         
-        // 🎯 SMART SHARE LOGIC:
-        // Check karo ki SDK available hai ya nahi (yani hum Farcaster mein hain ya browser mein)
         try {
-            if (sdk && sdk.actions) {
-                // Farcaster ke andar hain -> SDK use karo
+            if (typeof sdk !== 'undefined' && sdk.actions) {
                 sdk.actions.openUrl(warpcastUrl);
             } else {
-                // Browser ke andar hain -> Window open karo
                 window.open(warpcastUrl, '_blank');
             }
         } catch (e) {
-            // Agar koi bhi error aye, toh safe fallback
             window.open(warpcastUrl, '_blank');
         }
     });
