@@ -255,11 +255,11 @@ if (shareBtn) {
             return;
         }
 
-        const gameLink = 'https://muhammadammar5001.github.io/BasedTiles/'; 
+        const gameLink = 'https://based-tiles.vercel.app//'; 
         
         // Share Text
         // Note: maxComboSession use kar rahe hain taaki share mein sahi combo dikhe
-        const text = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ Best Score: ${bestScore}\n🔥 Max Combo: ${maxComboSession}\n\nCan you beat me? Play here: ${gameLink}`;
+        const text = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ All Best Score: ${bestScore}\n🔥 Game's Max Combo: ${maxComboSession}\n\nCan you beat me? Play here: ${gameLink}`;
         
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
         
