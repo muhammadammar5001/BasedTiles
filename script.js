@@ -1,3 +1,11 @@
+// --- 🟣 FARCASTER SDK INTEGRATION ---
+// 🎯 Critical: Correct CDN import as a module
+import { sdk } from 'https://esm.sh/@farcaster/miniapp-sdk';
+
+// 🎯 Critical: Farcaster Splash screen ko hatane ke liye (App display ready)
+sdk.actions.ready();
+
+
 // Game constants
 const COLUMNS = 4;
 const TILE_HEIGHT = 120;
@@ -106,6 +114,7 @@ function createTile(col,type){
   const id = tileId++;
   const div = document.createElement('div');
   div.classList.add('tile');
+  // 🎯 Note: Width/Height calculation will use the new container size
   div.style.width = container.clientWidth / COLUMNS + 'px';
   div.style.height = TILE_HEIGHT + 'px';
   div.style.left = col * (container.clientWidth / COLUMNS) + 'px';
@@ -213,7 +222,7 @@ function gameLoop(){
 }
 
 
-// --- 🟣 FINAL SIMPLE TEXT SHARE (Only Text) ---
+// --- 🟣 FARCASTER SDK SHARE (Simple Text) ---
 if (shareBtn) {
     shareBtn.addEventListener('click', () => { 
         if (gameState !== 'gameOver') {
@@ -229,8 +238,8 @@ if (shareBtn) {
         // Compose URL Create Karo (Only text)
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
         
-        // Simple window.open for maximum stability
-        window.open(warpcastUrl, '_blank');
+        // 🎯 Critical: SDK method for reliable opening in Farcaster client
+        sdk.actions.openUrl(warpcastUrl);
     });
 }
 
