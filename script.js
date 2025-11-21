@@ -1,10 +1,8 @@
-// --- 🟣 FARCASTER SDK INTEGRATION ---
-// 🎯 Critical: Correct CDN import as a module
+// --- FARCASTER SDK SETUP ---
 import { sdk } from 'https://esm.sh/@farcaster/miniapp-sdk';
 
-// 🎯 Critical: Farcaster Splash screen ko hatane ke liye (App display ready)
+// App Ready Signal
 sdk.actions.ready();
-
 
 // Game constants
 const COLUMNS = 4;
@@ -38,7 +36,7 @@ const statsEl = document.getElementById('stats');
 let bestScore = localStorage.getItem('basedTilesBestScore') || 0;
 bestScore = parseInt(bestScore, 10); 
 
-// --- AUDIO SETUP (UNCHANGED) ---
+// --- AUDIO SETUP ---
 const audioUrls = [];
 const notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']; 
 
@@ -65,7 +63,7 @@ const pianoSoundTemplates = audioUrls.map(item => {
 
 const blastSoundTemplate = new Audio('https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/sounds/blast.mp3');
 
-// --- HELPER FUNCTIONS (UNCHANGED) ---
+// --- HELPER FUNCTIONS ---
 function updateStats() {
   scoreEl.innerText = score;
   comboEl.innerText = combo;
@@ -114,7 +112,6 @@ function createTile(col,type){
   const id = tileId++;
   const div = document.createElement('div');
   div.classList.add('tile');
-  // 🎯 Note: Width/Height calculation will use the new container size
   div.style.width = container.clientWidth / COLUMNS + 'px';
   div.style.height = TILE_HEIGHT + 'px';
   div.style.left = col * (container.clientWidth / COLUMNS) + 'px';
@@ -135,7 +132,7 @@ function createTile(col,type){
   tiles.push({id,col,y:-TILE_HEIGHT,type,div});
 }
 
-// --- GAME STATE (UNCHANGED) ---
+// --- GAME STATE ---
 function startGame(){
   if (currentBlastSound) {
       currentBlastSound.pause();
@@ -222,7 +219,7 @@ function gameLoop(){
 }
 
 
-// --- 🟣 FARCASTER SDK SHARE (Simple Text) ---
+// --- SHARE ON FARCASTER (Simple Text via SDK) ---
 if (shareBtn) {
     shareBtn.addEventListener('click', () => { 
         if (gameState !== 'gameOver') {
@@ -232,19 +229,21 @@ if (shareBtn) {
 
         const gameLink = 'https://muhammadammar5001.github.io/BasedTiles/'; 
         
-        // Sirf Text Content (Koi Embeds nahi)
         const text = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ Best Score: ${bestScore}\n🔥 Combo: ${combo}\n\nCan you beat me? Play here: ${gameLink}`;
         
-        // Compose URL Create Karo (Only text)
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
         
-        // 🎯 Critical: SDK method for reliable opening in Farcaster client
-        sdk.actions.openUrl(warpcastUrl);
+        // Use SDK if available, else simple open
+        if (typeof sdk !== 'undefined' && sdk.actions) {
+            sdk.actions.openUrl(warpcastUrl);
+        } else {
+            window.open(warpcastUrl, '_blank');
+        }
     });
 }
 
 
-// --- Initial Setup and Event Listeners (UNCHANGED) ---
+// --- Initial Setup ---
 startBtn.addEventListener('click', startGame);
 playAgain.addEventListener('click', startGame);
 
