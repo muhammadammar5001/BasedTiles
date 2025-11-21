@@ -1,59 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Based Tiles</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Super Clicker</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+        background-color: #0f172a; /* Dark Blue Background */
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+      }
+      
+      /* Agar tumhara background.png load ho gaya toh ye override ho jayega */
+      body.has-bg {
+        background-image: url('/background.png');
+        background-size: cover;
+        background-position: center;
+      }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+      h1 { font-size: 2rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+      
+      #score {
+        font-size: 6rem;
+        font-weight: 900;
+        color: #a855f7; /* Purple Score */
+        margin: 20px 0;
+        text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+      }
 
+      button {
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        transition: transform 0.1s;
+      }
+      
+      button:active { transform: scale(0.95); }
 
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
+      .btn-main {
+        background: linear-gradient(to right, #3b82f6, #2563eb);
+        color: white;
+        padding: 20px 50px;
+        font-size: 1.5rem;
+        border-radius: 50px;
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        margin-bottom: 20px;
+      }
 
-<div id="game-title">
-  <h1>🎵 BASED TILES</h1>
-</div>
+      .btn-share {
+        background: #ffffff;
+        color: #0f172a;
+        padding: 12px 24px;
+        font-size: 1rem;
+        border-radius: 12px;
+        display: none; /* Initially hidden */
+        align-items: center;
+        gap: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Tap & Score!</h1>
+    
+    <div id="score">0</div>
+    
+    <button id="clickBtn" class="btn-main">TAP ME</button>
+    
+    <br/>
+    
+    <button id="shareBtn" class="btn-share">
+      Share Score on Warpcast
+    </button>
 
-<div id="game">
-  <div id="stats">
-    <div class="stat-box">
-      <div class="label">SCORE</div>
-      <div id="score">0</div>
-    </div>
-    <div class="stat-box">
-      <div class="label">COMBO</div>
-      <div id="combo">0</div>
-    </div>
-    <div class="stat-box">
-      <div class="label">LIVES</div>
-      <div id="lives">❤️❤️❤️</div>
-    </div>
-  </div>
-
-  <div id="game-container"></div>
-
-  <div id="menu">
-  <h1>🎹 BASED TILES</h1>
-  <p>Tap the tiles, ignore the bombs!</p>
-  <button id="start-btn">START GAME</button>
-</div>
-
-<div id="game-over">
-  <h1>💀 GAME OVER</h1>
-  <div>Score: <span id="final-score">0</span></div>
-  <div>Combo: <span id="final-combo">0</span></div>
-  <div id="best-score-over">Best Score: 0</div>
-  
-  <div class="button-group">
-      <button id="play-again">PLAY AGAIN</button>
-      <button id="share-btn">Share on Farcaster 🟣</button> 
-  </div>
-</div>
-
-<script src="script.js"></script>
-</body>
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>
