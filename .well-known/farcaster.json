@@ -1,0 +1,32 @@
+{
+  "accountAssociation": {
+    // ⚠️ IMPORTANT: Isko abhi khali chhod dein
+    // Iski values aapko Step 2 mein Base Build Tool se milengi.
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "baseBuilder": {
+    // ⚠️ IMPORTANT: Apna 0x address yahan daalein
+    "ownerAddress": "0x828c9541946a868782acA8E04c11a05D71053Da0" 
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Based Tiles Game",
+    "homeUrl": "https://based-tiles.vercel.app", 
+    "iconUrl": "https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/app_icon.png", 
+    "splashImageUrl": "https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/splash_loading.png",
+    "splashBackgroundColor": "#000000",
+    "subtitle": "Tap the tiles, avoid the bombs!",
+    "description": "A fun, fast-paced rhythm game built as a Mini App for the Farcaster and Base ecosystem.",
+    "screenshotUrls": [
+      "https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/screenshot_1.png"],
+    "primaryCategory": "games",
+    "tags": ["game", "arcade", "music", "base"],
+    "tagline": "Test your reflexes on Base.",
+    "ogTitle": "Based Tiles | Play the Mini App",
+    "ogDescription": "Play the Based Tiles Mini App directly on Farcaster or Base!",
+    "ogImageUrl": "https://raw.githubusercontent.com/muhammadammar5001/BasedTiles/main/assets/og_image.png",
+    "noindex": false 
+  }
+}
