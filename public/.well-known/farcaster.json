@@ -8,7 +8,7 @@
   },
   "baseBuilder": {
     // ⚠️ IMPORTANT: Apna 0x address yahan daalein
-    "ownerAddress": "0x70cedc2c5789efbdd29f324f8d329f8d00aa0d19" 
+    "ownerAddress": "0x828c9541946a868782acA8E04c11a05D71053Da0" 
   },
   "miniapp": {
     "version": "1",
