@@ -1,5 +1,16 @@
 {
-  "version": 2,
-  "public": true,
-  "framework": null
+  "rewrites": [
+    { "source": "/.well-known/farcaster.json", "destination": "/.well-known/farcaster.json" }
+  ],
+  "headers": [
+    {
+      "source": "/.well-known/farcaster.json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    }
+  ]
 }
