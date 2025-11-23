@@ -11,7 +11,7 @@
     "imageUrl": "https://based-tiles.vercel.app/splash.png",
     "buttonTitle": "Start Tapping!",
     "splashImageUrl": "https://based-tiles.vercel.app/splash.png",
-    "splashBackgroundColor": "#000000",
+    "splashBackgroundColor": "#FFFFFF",
     "webhookUrl": "https://based-tiles.vercel.app/api/webhook",
     "subtitle": "Tap the tiles, avoid the bombs",
     "description": "A fun, fast-paced rhythm game built as a Mini App for the Farcaster and Base ecosystem.",
