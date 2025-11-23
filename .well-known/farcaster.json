@@ -3,7 +3,7 @@
     "ownerAddress": "0x828c9541946a868782acA8E04c11a05D71053Da0" 
   },
   
-  "frame": {
+  "miniapp": {
     "name": "Based Tiles",
     "version": "1",
     "iconUrl": "https://based-tiles.vercel.app/app_icon.png",
