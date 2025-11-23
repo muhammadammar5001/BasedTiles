@@ -20,6 +20,7 @@
     "ogTitle": "Based Tiles_ Play the Mini App",
     "ogDescription": "Fast-paced rhythm arcade game for Base. Tap the tiles, avoid bombs, and set a new high score!",
     "castShareUrl": "https://warpcast.com/~/compose?text=Play+Based+Tiles+Mini+App+on+Farcaster!%20%23basedtiles",
+    "noindex": false
     "screenshotUrls": [
       "https://based-tiles.vercel.app/screenshot_1.png"
     ],
