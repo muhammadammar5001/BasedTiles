@@ -31,8 +31,8 @@
       "piano",
       "game"
     ],
-    "tagline": "Test your reflexes on Base.", // <-- Agar iske baad koi aur field hai, toh comma lagayein.
-    "noindex": false // <-- Aakhri field ke baad comma nahin lagana
+    "tagline": "Test your reflexes on Base.",
+    "noindex": false
   },
   "accountAssociation": {
     "header": "eyJmaWQiOjk3Mjg3OCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDU5MkZjQzE2NzY0MTA0QjYxMGQxNzgzNjMwMjFjOTc4MDdBQTI0YzMifQ",
