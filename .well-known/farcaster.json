@@ -32,7 +32,7 @@
       "game"
     ],
     "tagline": "Test your reflexes on Base."
-    "noindex": "false"
+    "noindex": false
   },
   "accountAssociation": {
     "header": "eyJmaWQiOjk3Mjg3OCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDU5MkZjQzE2NzY0MTA0QjYxMGQxNzgzNjMwMjFjOTc4MDdBQTI0YzMifQ",
