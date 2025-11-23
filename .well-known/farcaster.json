@@ -1,9 +1,4 @@
 {
-  "accountAssociation": {
-    "header": "eyJmaWQiOjk3Mjg3OCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDU0OTJDQkE3MkRFODcxMTYxYkM5YzE2MDRhNEM0ZTAxRDQzNmYxMGUifQ",
-    "payload": "eyJkb21haW4iOiJiYXNlZC10aWxlcy52ZXJjZWwuYXBwIn0",
-    "signature": "2brYI2YsoWwI3Q/YIVmGV4739s2NgwNa6Xir5u8Sa0Jl9PRmT0Bp9TaHTGBcz4xj/KBd6obEtuKgWRKYGP/mJBw="
-  },
   "baseBuilder": {
     "ownerAddress": "0x828c9541946a868782acA8E04c11a05D71053Da0" 
   },
@@ -36,4 +31,12 @@
     "ogImageUrl": "https://based-tiles.vercel.app/og_image.png",
     "castShareUrl": "https://warpcast.com/~/compose?text=Play+Based+Tiles+Mini+App+on+Farcaster!%20%23basedtiles",
     "ogDescription": "Fast-paced rhythm arcade game for Base. Tap the tiles, avoid bombs, and set a new high score!"
+    
+  },
+  
+  "accountAssociation": {
+    "header": "eyJmaWQiOjk3Mjg3OCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDU5MkZjQzE2NzY0MTA0QjYxMGQxNzgzNjMwMjFjOTc4MDdBQTI0YzMifQ",
+    "payload": "eyJkb21haW4iOiJiYXNlZC10aWxlcy52ZXJjZWwuYXBwIn0",
+    "signature": "E3dW840NPBtlcX5UC0oDh/QGnp4FMoq4BtyJ7Cdmz/J4BYRhLg8InUQfpYuc05RRc0O6pDJddk6jDSnumc2S+xs="
   }
+}
