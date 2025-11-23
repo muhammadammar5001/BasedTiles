@@ -31,7 +31,7 @@
     "ogImageUrl": "https://based-tiles.vercel.app/og_image.png",
     "castShareUrl": "https://warpcast.com/~/compose?text=Play+Based+Tiles+Mini+App+on+Farcaster!%20%23basedtiles",
     "ogDescription": "Fast-paced rhythm arcade game for Base. Tap the tiles, avoid bombs, and set a new high score!"
-    
+    "noindex": false 
   },
   
   "accountAssociation": {
