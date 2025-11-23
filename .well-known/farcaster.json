@@ -1,12 +1,10 @@
 {
   "accountAssociation": {
-    "header": "<generated-header>",
-    "payload": "<generated-payload>",
-    "signature": "<generated-signature>"
+    "header": "eyJmaWQiOjk3Mjg3OCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDU0OTJDQkE3MkRFODcxMTYxYkM5YzE2MDRhNEM0ZTAxRDQzNmYxMGUifQ",
+    "payload": "eyJkb21haW4iOiJiYXNlZC10aWxlcy52ZXJjZWwuYXBwIn0",
+    "signature": "2brYI2YsoWwI3Q/YIVmGV4739s2NgwNa6Xir5u8Sa0Jl9PRmT0Bp9TaHTGBcz4xj/KBd6obEtuKgWRKYGP/mJBw="
   },
-  "baseBuilder": {
-    "ownerAddress": "0x828c9541946a868782acA8E04c11a05D71053Da0" 
-  },
+
   "miniapp": {
     "version": "1",
     "name": "Based Tiles Game",
