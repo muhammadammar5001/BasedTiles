@@ -8,7 +8,7 @@
     "version": "1",
     "iconUrl": "https://based-tiles.vercel.app/app_icon.png",
     "homeUrl": "https://based-tiles.vercel.app",
-    "imageUrl": "https://based-tiles.vercel.app/image.png",
+    "imageUrl": "https://based-tiles.vercel.app/og_image.png",
     "buttonTitle": "Start Tapping!",
     "splashImageUrl": "https://based-tiles.vercel.app/splash.png",
     "splashBackgroundColor": "#000000",
