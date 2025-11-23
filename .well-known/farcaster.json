@@ -2,39 +2,38 @@
   "baseBuilder": {
     "ownerAddress": "0x828c9541946a868782acA8E04c11a05D71053Da0" 
   },
-  "miniapp": {
+  
+  "frame": {
     "name": "Based Tiles",
     "version": "1",
     "iconUrl": "https://based-tiles.vercel.app/app_icon.png",
     "homeUrl": "https://based-tiles.vercel.app",
-    "imageUrl": "https://based-tiles.vercel.app/og_image.png",
+    "imageUrl": "https://based-tiles.vercel.app/image.png",
     "buttonTitle": "Start Tapping!",
-    "splashImageUrl": "https://based-tiles.vercel.app/splash_loading.png",
+    "splashImageUrl": "https://based-tiles.vercel.app/splash.png",
     "splashBackgroundColor": "#000000",
     "webhookUrl": "https://based-tiles.vercel.app/api/webhook",
-    "heroImageUrl": "https://based-tiles.vercel.app/og_image.png",
+    "subtitle": "Tap the tiles, avoid the bombs",
+    "description": "A fun, fast-paced rhythm game built as a Mini App for the Farcaster and Base ecosystem.",
+    "primaryCategory": "games",
+    "ogImageUrl": "https://based-tiles.vercel.app/og_image.png",
+    "ogTitle": "Based Tiles_ Play the Mini App",
+    "ogDescription": "Fast-paced rhythm arcade game for Base. Tap the tiles, avoid bombs, and set a new high score!",
+    "castShareUrl": "https://warpcast.com/~/compose?text=Play+Based+Tiles+Mini+App+on+Farcaster!%20%23basedtiles",
     "screenshotUrls": [
       "https://based-tiles.vercel.app/screenshot_1.png"
     ],
-    "primaryCategory": "games",
-    "description": "A fun, fast-paced rhythm game built as a Mini App for the Farcaster and Base ecosystem.",
-    "subtitle": "Tap the tiles, avoid the bombs",
+    "heroImageUrl": "https://based-tiles.vercel.app/og_image.png",
     "tags": [
-      "\"game\"",
-      "arcade",
+      "fun",
       "music",
+      "arcade",
       "piano",
-      "fun"
+      "game"
     ],
-    "tagline": "Test your reflexes on Base.",
-    "ogTitle": "Based Tiles_ Play the Mini App",
-    "ogImageUrl": "https://based-tiles.vercel.app/og_image.png",
-    "castShareUrl": "https://warpcast.com/~/compose?text=Play+Based+Tiles+Mini+App+on+Farcaster!%20%23basedtiles",
-    "ogDescription": "Fast-paced rhythm arcade game for Base. Tap the tiles, avoid bombs, and set a new high score!"
-    "noindex": false 
+    "tagline": "Test your reflexes on Base."
   },
-  
-    "accountAssociation": {
+  "accountAssociation": {
     "header": "eyJmaWQiOjk3Mjg3OCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDU5MkZjQzE2NzY0MTA0QjYxMGQxNzgzNjMwMjFjOTc4MDdBQTI0YzMifQ",
     "payload": "eyJkb21haW4iOiJiYXNlZC10aWxlcy52ZXJjZWwuYXBwIn0",
     "signature": "E3dW840NPBtlcX5UC0oDh/QGnp4FMoq4BtyJ7Cdmz/J4BYRhLg8InUQfpYuc05RRc0O6pDJddk6jDSnumc2S+xs="
