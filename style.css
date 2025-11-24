@@ -20,10 +20,18 @@ body, html {
   flex-direction: column;
   align-items: center;
   width: 100%;
+  
+  /* ✅ PC FIX: Max-width wapas lagayi taaki PC par game bohot chaura na ho */
+  max-width: 500px; 
+  
   height: 100%;
   padding: 0; 
   box-sizing: border-box;
   position: relative;
+  
+  /* PC par thoda sa border dikhane ke liye (Optional) */
+  border-left: 1px solid rgba(255,255,255,0.1);
+  border-right: 1px solid rgba(255,255,255,0.1);
 }
 
 /* --- COMPACT Game Title --- */
