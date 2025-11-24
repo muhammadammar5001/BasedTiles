@@ -1,21 +1,11 @@
-
-/* style.css ke shuru mein */
-body, html {
-  margin: 0;
-  padding: 0;
-  height: 100vh; /* <-- Change this from 100% to 100vh */
-  width: 100vw;  /* <-- Add this */
-  font-family: 'Press Start 2P', cursive; 
-  /* ... baaki same ... */
-  overflow: hidden; 
-}
-
-
 /* --- Base Styles --- */
 body, html {
   margin: 0;
   padding: 0;
-  height: 100%;
+  /* MOBILE FIX: 100% ki jagah 100dvh use karein */
+  height: 100dvh; 
+  width: 100vw;
+  
   font-family: 'Press Start 2P', cursive; 
   font-size: 14px; 
   line-height: 1.5; 
@@ -23,7 +13,8 @@ body, html {
   background: linear-gradient(to bottom, #0f172a, #000);
   color: white;
   overflow: hidden; 
-  touch-action: none; 
+  touch-action: none; /* Mobile touch delay remove karne ke liye */
+  
   display: flex;
   justify-content: center;
 }
@@ -33,9 +24,9 @@ body, html {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 600px; 
+  /* Max-width hata diya taaki mobile par full screen ho */
   height: 100%;
-  padding: 10px;
+  padding: 0; /* Padding 0 kar di taaki edges tak game phail jaye */
   box-sizing: border-box;
   position: relative;
 }
@@ -45,11 +36,13 @@ body, html {
   text-align: center;
   margin-top: 10px;
   margin-bottom: 5px;
+  /* Title ko thoda chota karein mobile ke liye */
+  transform: scale(0.9); 
 }
 
 #game-title h1 {
   margin: 0;
-  font-size: 28px; 
+  font-size: 24px; /* Font size thoda adjust kiya */
   font-weight: normal; 
   letter-spacing: 2px;
   background: linear-gradient(to right, #06b6d4, #3b82f6, #8b5cf6);
@@ -63,10 +56,11 @@ body, html {
   display: flex;
   justify-content: space-around;
   width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: 5px; /* Margin kam kiya */
   background: rgba(0, 0, 0, 0.6);
-  border-radius: 15px; 
-  border: 1px solid rgba(255,255,255,0.1);
+  /* Border radius hataya taaki full width lage */
+  border-radius: 0; 
+  border-bottom: 1px solid rgba(255,255,255,0.1);
   backdrop-filter: blur(5px);
   padding: 8px 0;
 }
@@ -90,17 +84,19 @@ body, html {
   text-shadow: 0 0 5px cyan; 
 }
 
-/* --- Game Container --- */
+/* --- Game Container (CANVAS) --- */
 #game-container {
   position: relative;
   width: 100%;
+  /* Flex grow 1 ka matlab hai bachi hui saari jagah ye le lega */
   flex-grow: 1; 
   background: linear-gradient(to bottom, #000000, #0f172a);
-  border-radius: 12px;
-  border: 2px solid rgba(255,255,255,0.1);
-  box-shadow: 0 0 30px rgba(0,0,0,0.8);
+  /* Borders aur radius hataye taaki clean look aaye */
+  border-radius: 0; 
+  border: none;
+  box-shadow: none;
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 0;
 }
 
 .column-line {
