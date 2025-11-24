@@ -246,7 +246,7 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
-// --- SHARE ON FARCASTER (Universal Deep Link) ---
+// --- SHARE (Base App Native + Warpcast fallback) ---
 if (shareBtn) {
     shareBtn.addEventListener('click', () => {
         if (gameState !== 'gameOver') {
@@ -254,21 +254,30 @@ if (shareBtn) {
             return;
         }
 
-        const gameLink = 'https://based-tiles.vercel.app'; 
-        
-        // ✅ Text mein Game Link Shamil Karen
-        const shareText = `I scored ${score} in Based Tiles! My Max Combo: ${maxComboSession}. Can you beat me? Play here: ${gameLink}`;
-        
-        const encodedText = encodeURIComponent(shareText);
+        const gameLink = "https://based-tiles.vercel.app";
+        const text = `I just scored ${score} on BASED TILES! 🎵
 
-        // ✅ Deep Link se Embeds Hata Diye - Sirf Text Bheja
-        const farcasterDeepLink = `farcaster://casts/create?text=${encodedText}`;
+⭐ My Best Score: ${bestScore}
+🔥 My Max Combo: ${maxComboSession}
 
-        // Direct URL change (window.location.href) se Base/Warpcast ka Compose Screen khulega
+Can you beat me?`;
+
         try {
-            window.location.href = farcasterDeepLink;
-        } catch (e) {
-            console.error("Failed to open deep link via location.href", e);
+            // Base App native share
+            sdk.actions.composeCast({
+                text: text,
+                embeds: [gameLink]
+            });
+
+        } catch (err) {
+            // Warpcast fallback
+            const url =
+                "https://warpcast.com/~/compose?text=" +
+                encodeURIComponent(text) +
+                "&embeds[]=" +
+                encodeURIComponent(gameLink);
+
+            window.open(url, "_blank");
         }
     });
 }
