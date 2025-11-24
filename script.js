@@ -255,34 +255,29 @@ if (shareBtn) {
             return;
         }
 
-        // ✅ 1. Game Link mein se extra '/' hata diya
         const gameLink = 'https://based-tiles.vercel.app'; 
         
         // Share Text
-        const shareText = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ My Best Score: ${bestScore}\n🔥 My Best Combo: ${maxComboSession}\n\nCan you beat me?`;
+        const shareText = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ My Best Score: ${bestScore}\n🔥 My Max Combo: ${maxComboSession}\n\nCan you beat me?`;
         
         const encodedText = encodeURIComponent(shareText);
         const encodedEmbed = encodeURIComponent(gameLink);
 
-        // ✅ 2. Universal Farcaster Protocol URL banaya
-        // Ye Base App aur Warpcast, dono ka native compose screen khol dega.
+        // ✅ Farcaster Universal Protocol URL
         const farcasterDeepLink = `farcaster://casts/create?text=${encodedText}&embeds[]=${encodedEmbed}`;
 
+        // ✅ FINAL FIX: Direct URL change (window.location.href) use karein
+        // Is se Base App ka in-app browser Deep Link ko trigger karega.
         try {
-            if (typeof sdk !== 'undefined' && sdk.actions) {
-                // SDK ke zariye open karne se Deep Link sahi tarah se handle hoga
-                sdk.actions.openUrl(farcasterDeepLink);
-            } else {
-                // Fallback (Agar SDK load na ho)
-                window.location.href = farcasterDeepLink;
-            }
+            // Hum SDK use nahi kar rahe taaki Deep Link sahi se trigger ho.
+            // window.location.href use karne se Base app ko Deep link ka signal mil jayega.
+            window.location.href = farcasterDeepLink;
         } catch (e) {
             // Ultimate fallback
-            window.location.href = farcasterDeepLink;
+            console.error("Failed to open deep link via location.href", e);
         }
     });
 }
-
 
 // --- Initial Setup ---
 startBtn.addEventListener('click', startGame);
