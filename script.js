@@ -247,30 +247,38 @@ function gameLoop(){
 }
 
 
-// --- SHARE ON FARCASTER (Text Only) ---
+// --- SHARE ON FARCASTER (Universal Deep Link) ---
 if (shareBtn) {
-    shareBtn.addEventListener('click', () => { 
+    shareBtn.addEventListener('click', () => {
         if (gameState !== 'gameOver') {
             alert("Please finish the game first to share your score!");
             return;
         }
 
-        const gameLink = 'https://based-tiles.vercel.app//'; 
+        // ✅ 1. Game Link mein se extra '/' hata diya
+        const gameLink = 'https://based-tiles.vercel.app'; 
         
         // Share Text
-        // Note: maxComboSession use kar rahe hain taaki share mein sahi combo dikhe
-        const text = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ All Best Score: ${bestScore}\n🔥 Game's Max Combo: ${maxComboSession}\n\nCan you beat me? Play here: ${gameLink}`;
+        const shareText = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ My Best Score: ${bestScore}\n🔥 My Best Combo: ${maxComboSession}\n\nCan you beat me?`;
         
-        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
-        
+        const encodedText = encodeURIComponent(shareText);
+        const encodedEmbed = encodeURIComponent(gameLink);
+
+        // ✅ 2. Universal Farcaster Protocol URL banaya
+        // Ye Base App aur Warpcast, dono ka native compose screen khol dega.
+        const farcasterDeepLink = `farcaster://casts/create?text=${encodedText}&embeds[]=${encodedEmbed}`;
+
         try {
             if (typeof sdk !== 'undefined' && sdk.actions) {
-                sdk.actions.openUrl(warpcastUrl);
+                // SDK ke zariye open karne se Deep Link sahi tarah se handle hoga
+                sdk.actions.openUrl(farcasterDeepLink);
             } else {
-                window.open(warpcastUrl, '_blank');
+                // Fallback (Agar SDK load na ho)
+                window.location.href = farcasterDeepLink;
             }
         } catch (e) {
-            window.open(warpcastUrl, '_blank');
+            // Ultimate fallback
+            window.location.href = farcasterDeepLink;
         }
     });
 }
