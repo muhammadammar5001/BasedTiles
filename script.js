@@ -246,9 +246,7 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
-// ... (GameLoop ke baad ka saara code)
-
-// --- SHARE ON FARCASTER (Universal Deep Link) ---
+// --- SHARE ON BASE APP ONLY (Client Check) ---
 if (shareBtn) {
     shareBtn.addEventListener('click', () => {
         if (gameState !== 'gameOver') {
@@ -256,25 +254,35 @@ if (shareBtn) {
             return;
         }
 
-        const gameLink = 'https://based-tiles.vercel.app'; 
-        
-        // Share Text
-        const shareText = `I scored ${score} in Based Tiles! My Max Combo: ${maxComboSession}. Can you beat me?`;
-        
-        const encodedText = encodeURIComponent(shareText);
-        const encodedEmbed = encodeURIComponent(gameLink);
+        // 1. Client Ka Naam Check Karein
+        const clientName = sdk.context?.client?.name; // Safely check client name
 
-        // Farcaster Universal Protocol URL
-        const farcasterDeepLink = `farcaster://casts/create?text=${encodedText}&embeds[]=${encodedEmbed}`;
+        if (clientName === 'base' || clientName === 'farcaster') {
+            // Agar client 'base' ya 'farcaster' hai, tab hi aage badhein
+            
+            const gameLink = 'https://based-tiles.vercel.app'; 
+            const shareText = `I scored ${score} in Based Tiles! My Max Combo: ${maxComboSession}. Can you beat me?`;
+            
+            const encodedText = encodeURIComponent(shareText);
+            const encodedEmbed = encodeURIComponent(gameLink);
 
-        // Direct URL change (window.location.href) use karein for reliable deep linking
-        try {
-            window.location.href = farcasterDeepLink;
-        } catch (e) {
-            console.error("Failed to open deep link via location.href", e);
+            // Farcaster Deep Link (Base App isay samjhega)
+            const farcasterDeepLink = `farcaster://casts/create?text=${encodedText}&embeds[]=${encodedEmbed}`;
+
+            // window.location.href se Base App mein Deep Link trigger karein
+            try {
+                window.location.href = farcasterDeepLink;
+            } catch (e) {
+                console.error("Failed to open deep link", e);
+            }
+        } else {
+            // Agar koi aur client hai ya client ka naam nahi mila:
+            alert("This sharing feature is currently only supported in the Base App or Warpcast.");
         }
     });
 }
+// Note: clientName 'farcaster' (Warpcast) aur 'base' (Base App) dono ho sakta hai.
+// Isliye dono ko allow karna behtar hai. Agar aap sirf 'base' chahte hain toh 'farcaster' hata dein.
 
 
 // --- Initial Setup ---
