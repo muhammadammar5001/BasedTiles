@@ -246,7 +246,7 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
-// --- SHARE ON BASE APP ONLY (Client Check) ---
+// --- SHARE ON FARCASTER (Universal Deep Link) ---
 if (shareBtn) {
     shareBtn.addEventListener('click', () => {
         if (gameState !== 'gameOver') {
@@ -254,38 +254,29 @@ if (shareBtn) {
             return;
         }
 
-        // 1. Client Ka Naam Check Karein
-        const clientName = sdk.context?.client?.name; // Safely check client name
+        const gameLink = 'https://based-tiles.vercel.app'; 
+        
+        // Share Text
+        const shareText = `I scored ${score} in Based Tiles! My Max Combo: ${maxComboSession}. Can you beat me?`;
+        
+        const encodedText = encodeURIComponent(shareText);
+        const encodedEmbed = encodeURIComponent(gameLink);
 
-        if (clientName === 'base' || clientName === 'farcaster') {
-            // Agar client 'base' ya 'farcaster' hai, tab hi aage badhein
-            
-            const gameLink = 'https://based-tiles.vercel.app'; 
-            const shareText = `I scored ${score} in Based Tiles! My Max Combo: ${maxComboSession}. Can you beat me?`;
-            
-            const encodedText = encodeURIComponent(shareText);
-            const encodedEmbed = encodeURIComponent(gameLink);
+        // Farcaster Deep Link (This works for both Base App and Warpcast)
+        const farcasterDeepLink = `farcaster://casts/create?text=${encodedText}&embeds[]=${encodedEmbed}`;
 
-            // Farcaster Deep Link (Base App isay samjhega)
-            const farcasterDeepLink = `farcaster://casts/create?text=${encodedText}&embeds[]=${encodedEmbed}`;
-
-            // window.location.href se Base App mein Deep Link trigger karein
-            try {
-                window.location.href = farcasterDeepLink;
-            } catch (e) {
-                console.error("Failed to open deep link", e);
-            }
-        } else {
-            // Agar koi aur client hai ya client ka naam nahi mila:
-            alert("This sharing feature is currently only supported in the Base App or Warpcast.");
+        // FINAL RELIABLE FIX: Direct URL change (window.location.href) use karein
+        try {
+            // Is se Base/Warpcast App ka Native Compose Screen khul jayega.
+            window.location.href = farcasterDeepLink;
+        } catch (e) {
+            console.error("Failed to open deep link via location.href", e);
         }
     });
 }
-// Note: clientName 'farcaster' (Warpcast) aur 'base' (Base App) dono ho sakta hai.
-// Isliye dono ko allow karna behtar hai. Agar aap sirf 'base' chahte hain toh 'farcaster' hata dein.
 
 
-// --- Initial Setup ---
+// --- Initial Setup (Must be at the very end of the file) ---
 startBtn.addEventListener('click', startGame);
 playAgain.addEventListener('click', startGame);
 
@@ -298,6 +289,7 @@ window.addEventListener('keydown', e=>{
         if(colTiles.length > 0) handleTileTap(colTiles[0]);
     }
 });
+
 
 // Sound unlock for mobile browsers
 window.addEventListener('touchstart', () => {
