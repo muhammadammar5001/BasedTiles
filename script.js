@@ -246,38 +246,18 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
-
 // --- SHARE ON FARCASTER (Universal Deep Link) ---
-if (shareBtn) {
-    shareBtn.addEventListener('click', () => {
-        if (gameState !== 'gameOver') {
-            alert("Please finish the game first to share your score!");
-            return;
-        }
+// script.js mein is hisse ko dhoondhein:
+// const shareText = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ My Best Score: ${bestScore}\n🔥 My Max Combo: ${maxComboSession}\n\nCan you beat me?`;
 
-        const gameLink = 'https://based-tiles.vercel.app'; 
-        
-        // Share Text
-        const shareText = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ My Best Score: ${bestScore}\n🔥 My Max Combo: ${maxComboSession}\n\nCan you beat me?`;
-        
-        const encodedText = encodeURIComponent(shareText);
-        const encodedEmbed = encodeURIComponent(gameLink);
+// Aur is se replace kar dein:
+const shareText = `I scored ${score} in Based Tiles! My Max Combo: ${maxComboSession}. Can you beat me?`; 
+// Humne text ko simple, single line mein kar diya.
 
-        // ✅ Farcaster Universal Protocol URL
-        const farcasterDeepLink = `farcaster://casts/create?text=${encodedText}&embeds[]=${encodedEmbed}`;
+const encodedText = encodeURIComponent(shareText);
+// Baaki ka Deep Link code jaisa ka taisa rakhein:
+const farcasterDeepLink = `farcaster://casts/create?text=${encodedText}&embeds[]=${encodedEmbed}`;
 
-        // ✅ FINAL FIX: Direct URL change (window.location.href) use karein
-        // Is se Base App ka in-app browser Deep Link ko trigger karega.
-        try {
-            // Hum SDK use nahi kar rahe taaki Deep Link sahi se trigger ho.
-            // window.location.href use karne se Base app ko Deep link ka signal mil jayega.
-            window.location.href = farcasterDeepLink;
-        } catch (e) {
-            // Ultimate fallback
-            console.error("Failed to open deep link via location.href", e);
-        }
-    });
-}
 
 // --- Initial Setup ---
 startBtn.addEventListener('click', startGame);
