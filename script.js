@@ -256,18 +256,16 @@ if (shareBtn) {
 
         const gameLink = 'https://based-tiles.vercel.app'; 
         
-        // Share Text
-        const shareText = `I scored ${score} in Based Tiles! My Max Combo: ${maxComboSession}. Can you beat me?`;
+        // ✅ Text mein Game Link Shamil Karen
+        const shareText = `I scored ${score} in Based Tiles! My Max Combo: ${maxComboSession}. Can you beat me? Play here: ${gameLink}`;
         
         const encodedText = encodeURIComponent(shareText);
-        const encodedEmbed = encodeURIComponent(gameLink);
 
-        // Farcaster Deep Link (This works for both Base App and Warpcast)
-        const farcasterDeepLink = `farcaster://casts/create?text=${encodedText}&embeds[]=${encodedEmbed}`;
+        // ✅ Deep Link se Embeds Hata Diye - Sirf Text Bheja
+        const farcasterDeepLink = `farcaster://casts/create?text=${encodedText}`;
 
-        // FINAL RELIABLE FIX: Direct URL change (window.location.href) use karein
+        // Direct URL change (window.location.href) se Base/Warpcast ka Compose Screen khulega
         try {
-            // Is se Base/Warpcast App ka Native Compose Screen khul jayega.
             window.location.href = farcasterDeepLink;
         } catch (e) {
             console.error("Failed to open deep link via location.href", e);
