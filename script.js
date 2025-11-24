@@ -246,17 +246,35 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
+// ... (GameLoop ke baad ka saara code)
+
 // --- SHARE ON FARCASTER (Universal Deep Link) ---
-// script.js mein is hisse ko dhoondhein:
-// const shareText = `I just scored ${score} on BASED TILES! 🎵\n\n⭐ My Best Score: ${bestScore}\n🔥 My Max Combo: ${maxComboSession}\n\nCan you beat me?`;
+if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+        if (gameState !== 'gameOver') {
+            alert("Please finish the game first to share your score!");
+            return;
+        }
 
-// Aur is se replace kar dein:
-const shareText = `I scored ${score} in Based Tiles! My Max Combo: ${maxComboSession}. Can you beat me?`; 
-// Humne text ko simple, single line mein kar diya.
+        const gameLink = 'https://based-tiles.vercel.app'; 
+        
+        // Share Text
+        const shareText = `I scored ${score} in Based Tiles! My Max Combo: ${maxComboSession}. Can you beat me?`;
+        
+        const encodedText = encodeURIComponent(shareText);
+        const encodedEmbed = encodeURIComponent(gameLink);
 
-const encodedText = encodeURIComponent(shareText);
-// Baaki ka Deep Link code jaisa ka taisa rakhein:
-const farcasterDeepLink = `farcaster://casts/create?text=${encodedText}&embeds[]=${encodedEmbed}`;
+        // Farcaster Universal Protocol URL
+        const farcasterDeepLink = `farcaster://casts/create?text=${encodedText}&embeds[]=${encodedEmbed}`;
+
+        // Direct URL change (window.location.href) use karein for reliable deep linking
+        try {
+            window.location.href = farcasterDeepLink;
+        } catch (e) {
+            console.error("Failed to open deep link via location.href", e);
+        }
+    });
+}
 
 
 // --- Initial Setup ---
@@ -264,15 +282,16 @@ startBtn.addEventListener('click', startGame);
 playAgain.addEventListener('click', startGame);
 
 window.addEventListener('keydown', e=>{
-  if(gameState!=='playing') return;
-  const map={'1':0,'2':1,'3':2,'4':3,'q':0,'w':1,'e':2,'r':3};
-  const col = map[e.key.toLowerCase()];
-  if(col!==undefined){
-      const colTiles = tiles.filter(t => t.col === col).sort((a,b) => b.y - a.y);
-      if(colTiles.length > 0) handleTileTap(colTiles[0]);
-  }
+    if(gameState!=='playing') return;
+    const map={'1':0,'2':1,'3':2,'4':3,'q':0,'w':1,'e':2,'r':3};
+    const col = map[e.key.toLowerCase()];
+    if(col!==undefined){
+        const colTiles = tiles.filter(t => t.col === col).sort((a,b) => b.y - a.y);
+        if(colTiles.length > 0) handleTileTap(colTiles[0]);
+    }
 });
 
+// Sound unlock for mobile browsers
 window.addEventListener('touchstart', () => {
     if(pianoSoundTemplates.length > 0) {
         const dummy = pianoSoundTemplates[0].cloneNode();
